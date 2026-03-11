@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- PWA Support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="OutreachOS">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#00e87a">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<title>OutreachOS Professional Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   THEME SYSTEM
+   ============================================ */
+:root {
+  --bg:#0c0e14;--card:#12151e;--card2:#181c28;--border:#232840;--border2:#2e3450;
+  --green:#00e87a;--gdim:rgba(0,232,122,0.1);--gborder:rgba(0,232,122,0.25);
+  --orange:#ff8c42;--odim:rgba(255,140,66,0.1);--oborder:rgba(255,140,66,0.25);
+  --red:#ff4466;--rdim:rgba(255,68,102,0.1);--rborder:rgba(255,68,102,0.25);
+  --blue:#4d9fff;--bdim:rgba(77,159,255,0.1);--bborder:rgba(77,159,255,0.25);
+  --yellow:#ffd93d;--text:#f0f4f8;--muted:#7a8499;--muted2:#4a5568;
+}
+
+/* Light theme */
+body.light {
+  --bg:#f5f6fa;--card:#ffffff;--card2:#f0f2f7;--border:#e1e4eb;--border2:#d0d4de;
+  --green:#00a859;--gdim:rgba(0,168,89,0.08);--gborder:rgba(0,168,89,0.2);
+  --orange:#e67700;--odim:rgba(230,119,0,0.08);--oborder:rgba(230,119,0,0.2);
+  --red:#e03d56;--rdim:rgba(224,61,86,0.08);--rborder:rgba(224,61,86,0.2);
+  --blue:#2a7de1;--bdim:rgba(42,125,225,0.08);--bborder:rgba(42,125,225,0.2);
+  --yellow:#d4a000;--text:#1a1d2e;--muted:#5a6080;--muted2:#8a90a8;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Familjen Grotesk',sans-serif;min-height:100vh;font-size:15px}
+.shell{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+.sidebar{background:var(--card);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.logo-name{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.02em}
+.logo-tag{font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px}
+.nav{padding:0 10px;flex:1}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:var(--muted);transition:all 0.15s;user-select:none;margin-bottom:2px}
+.ni:hover{background:var(--card2);color:var(--text)}
+.ni.active{background:rgba(0,232,122,0.08);color:var(--green)}
+.nb{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:100px}
+.nb.g{background:var(--green);color:#0c0e14}
+.sfoot{padding:16px 20px 0;border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.ldot{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 2s infinite}
+.ldot.connected{background:var(--green)}
+.topbar{grid-column:2;background:var(--card);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.ptitle{font-size:17px;font-weight:700;color:#fff}
+.theme-toggle{background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.15s;display:flex;align-items:center;gap:7px}
+.theme-toggle:hover{border-color:var(--text);color:var(--text)}
+.main{padding:24px 28px 80px;overflow-y:auto}
+.page{display:none}.page.active{display:block;animation:fadeUp 0.2s ease}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.stat.acc{background:var(--green);border-color:var(--green)}
+.slbl{font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.stat.acc .slbl{color:rgba(0,0,0,0.5)}
+.sval{font-size:30px;font-weight:800;color:#fff;letter-spacing:-0.03em;line-height:1}
+.stat.acc .sval{color:#0c0e14}
+.ssub{font-size:11px;color:var(--muted);margin-top:4px}
+.stat.acc .ssub{color:rgba(0,0,0,0.4)}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.ph{padding:13px 18px;background:var(--card2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.pt{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+.pb{padding:18px}
+label{display:block;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Familjen Grotesk',sans-serif;font-size:15px;padding:10px 14px;outline:none;transition:border-color 0.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,232,122,0.07)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+select option{background:var(--card2)}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;font-family:'Familjen Grotesk',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;border:none;padding:10px 16px;white-space:nowrap}
+.bpri{background:var(--green);color:#0c0e14}
+.bpri:hover{background:#00d46e;transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,232,122,0.2)}
+.bpri:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none}
+.bout{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.bout:hover{border-color:var(--green);color:var(--green)}
+.bred{background:var(--rdim);border:1px solid var(--rborder);color:var(--red)}
+.bfull{width:100%;margin-top:14px;padding:13px;font-size:15px}
+.bsm{padding:7px 13px;font-size:13px}
+.spin-i{width:14px;height:14px;border:2px solid rgba(0,0,0,0.2);border-top-color:#0c0e14;border-radius:50%;animation:rot 0.7s linear infinite;display:none}
+.bpri.loading .spin-i{display:block}
+
+.filter-bar{display:flex;gap:12px;align-items:center;padding:14px;background:rgba(35,40,64,0.3);border-radius:10px;margin-bottom:16px;flex-wrap:wrap}
+.filter-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+.filter-select{width:auto;min-width:150px;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:6px;font-size:13px;color:var(--text)}
+
+.be-status{padding:12px 18px;border-radius:10px;font-size:14px;font-weight:500;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.be-offline{background:var(--rdim);border:1px solid var(--rborder);color:#ff8099}
+.be-online{background:var(--gdim);border:1px solid var(--gborder);color:var(--green)}
+
+.log-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);height:160px;overflow-y:auto;margin:14px 0;line-height:1.7}
+.prog-wrap{background:var(--bg);border:1px solid var(--border);border-radius:100px;height:8px;margin:10px 0;overflow:hidden}
+.prog-bar{height:100%;background:var(--green);border-radius:100px;transition:width 0.4s ease;width:0%}
+
+.lead-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;animation:fadeUp 0.2s ease}
+.lead-card.ready{border-color:var(--gborder);background:rgba(0,232,122,0.03)}
+.lc-info{flex:1;min-width:180px}
+.lc-name{font-size:15px;font-weight:700;color:#fff;margin-bottom:3px}
+.lc-meta{font-size:13px;color:var(--text);line-height:1.7;opacity:0.8}
+.lc-issues{margin-top:6px}
+.issue-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;margin:2px 2px 2px 0}
+.it-red{background:var(--rdim);color:var(--red);border:1px solid var(--rborder)}
+.it-orange{background:var(--odim);color:var(--orange);border:1px solid var(--oborder)}
+.it-yellow{background:rgba(255,217,61,0.1);color:var(--yellow);border:1px solid rgba(255,217,61,0.25)}
+.lc-score{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;text-align:center;min-width:60px;padding-top:4px}
+.score-poor{color:var(--red)}.score-avg{color:var(--orange)}.score-ok{color:var(--yellow)}
+.lc-actions{display:flex;flex-direction:column;gap:7px;min-width:160px}
+
+.qcard{background:var(--card);border:1px solid var(--oborder);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.qh{padding:12px 16px;background:var(--odim);border-bottom:1px solid var(--oborder);display:flex;align-items:center;justify-content:space-between}
+.qname{font-size:15px;font-weight:700;color:#fff}
+.qwhy{font-size:12px;color:var(--orange);font-weight:600;margin-top:2px}
+.qbody{padding:14px 16px;font-size:13px;line-height:1.7;color:var(--text);opacity:0.9;white-space:pre-wrap;max-height:120px;overflow-y:auto}
+.qfoot{padding:10px 16px;border-top:1px solid var(--border);background:var(--card2);display:flex;gap:8px}
+
+.twrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);padding:11px 16px;text-align:left;background:var(--card2);border-bottom:1px solid var(--border)}
+td{padding:11px 16px;font-size:14px;border-bottom:1px solid rgba(35,40,64,0.8);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.01)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:100px;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.pill:hover{opacity:0.7}
+.pp{background:rgba(90,96,128,0.15);color:var(--muted);border-color:var(--border2)}
+.ps{background:var(--bdim);color:var(--blue);border-color:var(--bborder)}
+.po{background:rgba(255,217,61,0.1);color:var(--yellow);border-color:rgba(255,217,61,0.25)}
+.pr{background:var(--gdim);color:var(--green);border-color:var(--gborder)}
+.pc{background:var(--odim);color:var(--orange);border-color:var(--oborder)}
+.dbtn{background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:4px 8px;border-radius:4px;transition:all 0.15s}
+.dbtn:hover{color:var(--red);background:var(--rdim)}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:14px}
+.err-box{background:var(--rdim);border:1px solid var(--rborder);border-radius:8px;color:var(--red);font-size:13px;padding:10px 14px;margin-top:10px;display:none}
+.err-box.show{display:block}
+.toast{position:fixed;bottom:24px;right:24px;background:#fff;color:#0c0e14;font-size:14px;font-weight:700;padding:12px 18px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:9999;display:none;align-items:center;gap:8px}
+.toast.show{display:flex;animation:toastIn 0.3s ease}
+
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal.show{display:flex;animation:fadeUp 0.2s ease}
+.modal-content{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:900px;width:100%;max-height:90vh;overflow-y:auto;position:relative}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:18px;font-weight:700;color:#fff}
+.modal-close{background:transparent;border:none;color:var(--muted);font-size:28px;cursor:pointer;padding:0;line-height:1;transition:color 0.15s}
+.modal-close:hover{color:var(--red)}
+.modal-body{padding:24px}
+.script-col{flex:1}
+.notes-col{background:var(--card2);border-radius:10px;padding:16px;min-width:280px}
+.script-intro{padding:14px;background:rgba(0,232,122,0.08);border:1px solid var(--gborder);border-radius:10px;margin-bottom:20px}
+.script-intro-title{font-size:14px;font-weight:700;color:var(--green);margin-bottom:4px}
+.script-intro-text{font-size:13px;color:var(--text);opacity:0.8;line-height:1.6}
+.script-section{margin-bottom:20px;padding:16px;background:rgba(35,40,64,0.3);border-radius:10px}
+.script-heading{font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px}
+.script-text{font-size:15px;line-height:1.9;color:var(--text);white-space:pre-wrap}
+.breakdown-section{margin-top:24px;padding-top:24px;border-top:1px solid var(--border)}
+.breakdown-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:12px}
+.breakdown-item{padding:12px;background:rgba(35,40,64,0.2);border-radius:8px;margin-bottom:8px}
+.breakdown-issue{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px}
+.breakdown-exp{font-size:13px;color:var(--text);opacity:0.85;line-height:1.6}
+.severity-badge{display:inline-block;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;margin-left:8px}
+.sev-high{background:rgba(255,68,102,0.2);color:var(--red)}
+.sev-medium{background:rgba(255,140,66,0.2);color:var(--orange)}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);background:var(--card2);display:flex;gap:10px;justify-content:flex-end}
+
+.notes-title{font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.notes-area{width:100%;min-height:150px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;line-height:1.6;color:var(--text);font-family:'Familjen Grotesk',sans-serif;resize:vertical}
+.call-outcome{margin-top:14px}
+.outcome-btns{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+
+/* Call guide */
+.guide-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
+.guide-title{font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.guide-dialogue{font-size:15px;color:var(--text);line-height:1.9;font-style:italic;margin-bottom:10px;padding-left:14px;border-left:3px solid var(--green)}
+.guide-tip{font-size:13px;color:var(--muted);background:rgba(0,232,122,0.05);padding:10px 12px;border-radius:6px;margin-top:10px}
+.guide-objection{background:var(--card2);padding:12px;border-radius:8px;margin-top:8px}
+.obj-trigger{font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px}
+.obj-response{font-size:14px;color:var(--text);line-height:1.7;opacity:0.9}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rot{to{transform:rotate(360deg)}}
+@keyframes blink{50%{opacity:0.3}}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  
+  .sidebar {
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  
+  .logo {
+    padding: 0 16px 16px;
+    margin-bottom: 12px;
+  }
+  
+  .nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 12px;
+    gap: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .ni {
+    white-space: nowrap;
+    padding: 8px 12px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  
+  .sfoot {
+    display: none;
+  }
+  
+  .topbar {
+    grid-column: 1;
+    padding: 12px 16px;
+  }
+  
+  .ptitle {
+    font-size: 15px;
+  }
+  
+  .theme-toggle {
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 5px;
+  }
+  
+  .main {
+    padding: 16px 16px 80px;
+  }
+  
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  
+  .stat {
+    padding: 12px 14px;
+  }
+  
+  .slbl {
+    font-size: 8px;
+    margin-bottom: 6px;
+  }
+  
+  .sval {
+    font-size: 24px;
+  }
+  
+  .ssub {
+    font-size: 10px;
+  }
+  
+  .panel {
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .ph {
+    padding: 10px 14px;
+  }
+  
+  .pb {
+    padding: 14px;
+  }
+  
+  .f2 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .field {
+    margin-bottom: 10px;
+  }
+  
+  input, select, textarea {
+    font-size: 16px;
+    padding: 12px;
+  }
+  
+  .btn {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+  
+  .bsm {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  .filter-select {
+    width: 100%;
+    min-width: 0;
+  }
+  
+  .lead-card {
+    flex-direction: column;
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  .lc-score {
+    align-self: flex-start;
+    font-size: 20px;
+    min-width: 50px;
+  }
+  
+  .lc-info {
+    min-width: 0;
+  }
+  
+  .lc-name {
+    font-size: 14px;
+  }
+  
+  .lc-meta {
+    font-size: 12px;
+  }
+  
+  .lc-actions {
+    width: 100%;
+    min-width: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .lc-actions .btn {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+  
+  .lc-actions select {
+    flex: 1 1 100%;
+  }
+  
+  .modal {
+    padding: 10px;
+  }
+  
+  .modal-content {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+  
+  .modal-header {
+    padding: 14px 16px;
+  }
+  
+  .modal-title {
+    font-size: 16px;
+  }
+  
+  .modal-close {
+    font-size: 24px;
+  }
+  
+  .modal-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .notes-col {
+    min-width: 0;
+    width: 100%;
+  }
+  
+  .script-section {
+    padding: 12px;
+  }
+  
+  .script-heading {
+    font-size: 13px;
+  }
+  
+  .script-text {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  
+  .breakdown-item {
+    padding: 10px;
+  }
+  
+  .breakdown-issue {
+    font-size: 12px;
+  }
+  
+  .breakdown-exp {
+    font-size: 12px;
+  }
+  
+  .notes-area {
+    min-height: 120px;
+    font-size: 14px;
+  }
+  
+  .outcome-btns {
+    gap: 8px;
+  }
+  
+  .modal-footer {
+    padding: 12px 16px;
+    flex-direction: column;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+  }
+  
+  .qcard {
+    border-radius: 10px;
+  }
+  
+  .qh {
+    padding: 10px 12px;
+  }
+  
+  .qname {
+    font-size: 14px;
+  }
+  
+  .qwhy {
+    font-size: 11px;
+  }
+  
+  .qbody {
+    padding: 12px;
+    font-size: 12px;
+  }
+  
+  .qfoot {
+    padding: 10px 12px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .qfoot .btn {
+    width: 100%;
+  }
+  
+  .twrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  table {
+    min-width: 600px;
+  }
+  
+  th, td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  
+  th {
+    font-size: 9px;
+  }
+  
+  .guide-section {
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .guide-title {
+    font-size: 13px;
+  }
+  
+  .guide-dialogue {
+    font-size: 14px;
+    padding-left: 10px;
+  }
+  
+  .guide-tip {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+  
+  .guide-objection {
+    padding: 10px;
+  }
+  
+  .obj-trigger {
+    font-size: 12px;
+  }
+  
+  .obj-response {
+    font-size: 13px;
+  }
+  
+  .toast {
+    bottom: 80px;
+    right: 16px;
+    left: 16px;
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+  
+  .log-box {
+    height: 120px;
+    font-size: 11px;
+    padding: 10px;
+  }
+  
+  .issue-tag {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+}
+
+@media (max-width: 375px) {
+  .stats {
+    gap: 8px;
+  }
+  
+  .stat {
+    padding: 10px 12px;
+  }
+  
+  .sval {
+    font-size: 20px;
+  }
+  
+  .ptitle {
+    font-size: 14px;
+  }
+  
+  .main {
+    padding: 12px 12px 80px;
+  }
+  
+  .lc-actions .btn {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .modal-body {
+    flex-direction: row;
+    gap: 20px;
+  }
+  
+  .notes-col {
+    width: 300px;
+    min-width: 280px;
+  }
+  
+  .modal-content {
+    max-height: 90vh;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .btn, .pill, .ni, .dbtn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .bsm {
+    min-height: 38px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="logo"><div class="logo-name">OutreachOS</div><div class="logo-tag">Professional Platform</div></div>
+  <nav class="nav">
+    <div class="ni active" onclick="go('bulk',this)"><span>🔍</span> Search</div>
+    <div class="ni" onclick="go('database',this)"><span>🗄️</span> Database <span class="nb g" id="dbBadge">0</span></div>
+    <div class="ni" onclick="go('queue',this)"><span>🚩</span> Queue <span class="nb" id="qBadge" style="display:none">0</span></div>
+    <div class="ni" onclick="go('leads',this)"><span>📋</span> Leads <span class="nb g" id="lBadge">0</span></div>
+    <div class="ni" onclick="go('history',this)"><span>📞</span> Calls <span class="nb g" id="hBadge">0</span></div>
+    <div class="ni" onclick="go('sequence',this)"><span>📅</span> Sequence</div>
+    <div class="ni" onclick="go('guide',this)"><span>📖</span> Guide</div>
+  </nav>
+  <div class="sfoot"><div class="ldot" id="connDot"></div><span id="connTxt">Checking...</span></div>
+</aside>
+
+<div style="display:flex;flex-direction:column;grid-column:2;min-height:100vh">
+<header class="topbar">
+  <div class="ptitle" id="pageTitle">Live Lead Search</div>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <span id="themeIcon">☀️</span>
+    <span id="themeText">Light</span>
+  </button>
+</header>
+
+<main class="main">
+
+<div class="stats">
+  <div class="stat acc"><div class="slbl">Emails Sent</div><div class="sval" id="sSent">0</div><div class="ssub">This session</div></div>
+  <div class="stat"><div class="slbl">In Queue</div><div class="sval" id="sQueue">0</div><div class="ssub">Review</div></div>
+  <div class="stat"><div class="slbl">Total Leads</div><div class="sval" id="sLeads">0</div><div class="ssub">Tracked</div></div>
+  <div class="stat"><div class="slbl">Calls Made</div><div class="sval" id="sCalls">0</div><div class="ssub">Logged</div></div>
+</div>
+
+<!-- SEARCH PAGE -->
+<div class="page active" id="page-bulk">
+  <div class="be-status be-offline" id="beStatus">⚠️ Backend not running — double-click RUN.bat</div>
+  
+  <div class="panel">
+    <div class="ph"><span class="pt">Search Settings</span></div>
+    <div class="pb">
+      <div class="f2" style="margin-bottom:12px">
+        <div class="field"><label>Trade</label><input type="text" id="bTrade" value="Plumbers" /></div>
+        <div class="field"><label>City / Area</label><input type="text" id="bCity" placeholder="Derby, Leicester..." /></div>
+      </div>
+      <div class="f2" style="margin-bottom:0">
+        <div class="field"><label>Number of leads</label>
+          <select id="bCount">
+            <option value="10">10 leads</option>
+            <option value="20" selected>20 leads</option>
+            <option value="50">50 leads</option>
+            <option value="100">100 leads</option>
+            <option value="200">200 leads (slow)</option>
+          </select>
+        </div>
+        <div class="field"><label>Email Type</label>
+          <select id="bType">
+            <option value="cold">Cold Intro</option>
+            <option value="audit">Free Audit</option>
+            <option value="followup">Follow Up</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn bpri bfull" id="searchBtn" onclick="runSearch()">
+        <div class="spin-i"></div>
+        <span id="searchTxt">🔍 Find Real Leads</span>
+      </button>
+      <div class="err-box" id="searchErr"></div>
+    </div>
+  </div>
+
+  <div id="filterBar" class="filter-bar" style="display:none">
+    <span class="filter-label">Quick Filters:</span>
+    <select id="filterScore" class="filter-select" onchange="applyFilters()">
+      <option value="0">All SEO scores</option>
+      <option value="20">Below 20 (worst)</option>
+      <option value="30">Below 30 (easy wins)</option>
+      <option value="40">Below 40</option>
+      <option value="50">Below 50</option>
+    </select>
+    <select id="filterEmail" class="filter-select" onchange="applyFilters()">
+      <option value="all">All leads</option>
+      <option value="has">Has email</option>
+      <option value="none">No email</option>
+    </select>
+    <span style="margin-left:auto;font-size:13px;color:var(--text);opacity:0.8"><span id="filterCount">0</span> shown</span>
+  </div>
+
+  <div id="jobPanel" style="display:none">
+    <div class="panel">
+      <div class="ph"><span class="pt" id="jobTitle">⚙ Running Pipeline</span></div>
+      <div class="pb" style="padding-bottom:10px">
+        <div class="prog-wrap"><div class="prog-bar" id="progBar"></div></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px" id="progTxt">Starting...</div>
+        <div class="log-box" id="logBox"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)" id="resultSummary"></div>
+    </div>
+    <div id="leadsList"></div>
+  </div>
+</div>
+
+<!-- DATABASE PAGE -->
+<div class="page" id="page-database">
+  <div style="margin-bottom:18px">
+    <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px">🗄️ Business Database</div>
+    <div style="font-size:14px;color:var(--text);opacity:0.8">All businesses ever found</div>
+  </div>
+  <div id="filterBarDB" class="filter-bar">
+    <span class="filter-label">Filter:</span>
+    <select id="dbFilterScore" class="filter-select" onchange="applyDBFilters()">
+      <option value="0">All scores</option>
+      <option value="30" selected>Below 30</option>
+      <option value="40">Below 40</option>
+      <option value="50">Below 50</option>
+    </select>
+    <select id="dbFilterStatus" class="filter-select" onchange="applyDBFilters()">
+      <option value="all">All statuses</option>
+      <option value="pending">Pending</option>
+      <option value="called">Called</option>
+      <option value="contacted">Contacted</option>
+    </select>
+    <select id="dbFilterEmail" class="filter-select" onchange="applyDBFilters()">
+      <option value="all">All</option>
+      <option value="has">Has email</option>
+      <option value="none">No email</option>
+    </select>
+    <span style="margin-left:auto;font-size:13px;color:var(--text);opacity:0.8"><span id="dbFilterCount">0</span> shown</span>
+  </div>
+  <div id="databaseList"></div>
+</div>
+
+<!-- QUEUE PAGE -->
+<div class="page" id="page-queue">
+  <div style="margin-bottom:18px">
+    <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px">🚩 Approval Queue</div>
+    <div style="font-size:14px;color:var(--text);opacity:0.8">Emails flagged for review</div>
+  </div>
+  <div id="queueList"></div>
+</div>
+
+<!-- LEADS PAGE -->
+<div class="page" id="page-leads">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px">📋 Leads Tracker</div>
+      <div style="font-size:14px;color:var(--text);opacity:0.8">Click status to update</div>
+    </div>
+    <button class="btn bout bsm" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+  <div class="twrap"><div id="leadsBody"></div></div>
+</div>
+
+<!-- CALL HISTORY PAGE -->
+<div class="page" id="page-history">
+  <div style="margin-bottom:18px">
+    <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px">📞 Call History</div>
+    <div style="font-size:14px;color:var(--text);opacity:0.8">All logged calls with notes</div>
+  </div>
+  <div id="historyList"></div>
+</div>
+
+<!-- SEQUENCE PAGE -->
+<div class="page" id="page-sequence">
+  <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:18px">📅 5-Touch Sequence</div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px">
+      <div style="min-width:56px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center">
+        <div style="font-size:18px">🧊</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px">Day 0</div>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Cold Intro</div>
+        <div style="font-size:13px;color:var(--text);opacity:0.8;line-height:1.6">First touch. Personalized to real site issues. Auto-sent for high confidence.</div>
+      </div>
+    </div>
+    
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px">
+      <div style="min-width:56px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center">
+        <div style="font-size:18px">🔄</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px">Day 3</div>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Follow Up</div>
+        <div style="font-size:13px;color:var(--text);opacity:0.8;line-height:1.6">Brief nudge. Reference first email. Add one new insight.</div>
+      </div>
+    </div>
+    
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px">
+      <div style="min-width:56px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center">
+        <div style="font-size:18px">📞</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px">Day 5</div>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Cold Call</div>
+        <div style="font-size:13px;color:var(--text);opacity:0.8;line-height:1.6">"I emailed about your ranking." Use Call Script feature.</div>
+      </div>
+    </div>
+    
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px">
+      <div style="min-width:56px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center">
+        <div style="font-size:18px">🔍</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px">Day 8</div>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Free Audit Offer</div>
+        <div style="font-size:13px;color:var(--text);opacity:0.8;line-height:1.6">Strongest email. Gets most replies.</div>
+      </div>
+    </div>
+    
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px">
+      <div style="min-width:56px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center">
+        <div style="font-size:18px">👋</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px">Day 14</div>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Breakup Email</div>
+        <div style="font-size:13px;color:var(--text);opacity:0.8;line-height:1.6">"Last one." Gets high replies paradoxically.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CALL GUIDE PAGE -->
+<div class="page" id="page-guide">
+  <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:18px">📖 Complete Cold Call Guide</div>
+  
+  <div style="background:var(--gdim);border:1px solid var(--gborder);border-radius:10px;padding:14px;margin-bottom:20px">
+    <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px">💡 Pro Tip</div>
+    <div style="font-size:14px;color:var(--text);opacity:0.9;line-height:1.7">
+      This is a general framework. For <strong>CUSTOMIZED scripts</strong> based on each business's real SEO issues, click <strong>"📞 Call Script"</strong> on any lead in Search or Database tabs. AI generates unique scripts with their specific problems.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="guide-title">👋 OPENING (10 seconds)</div>
+    <div class="guide-dialogue">
+      "Hi [Name], this is [Your Name] from [Your Company]. I'll be completely upfront — this is a cold call about your website's Google visibility, but I promise I'll keep it really quick. Is now a good time?"
+    </div>
+    <div class="guide-tip">
+      <strong>💡 Why this works:</strong> Being honest immediately disarms them. Most cold callers pretend they know them. Your honesty builds instant trust. The "keep it quick" promise lowers resistance.
+    </div>
+    <div class="guide-objection">
+      <div class="obj-trigger">If they say "No, I'm busy":</div>
+      <div class="obj-response">"No worries at all — can I call back tomorrow morning or later this week? Takes 2 minutes, I promise."</div>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="guide-title">🎯 THE HOOK (15 seconds)</div>
+    <div class="guide-dialogue">
+      "So the reason I'm calling — I was searching for plumbers in [City] on Google earlier, and [Business Name] wasn't showing up at all. I had a quick look at your site and ran it through our SEO tool. It's scoring [Score]/100, which explains why you're not appearing in searches."
+    </div>
+    <div class="guide-tip">
+      <strong>💡 Why this works:</strong> You've done homework (searched for them). You have a specific number (the score). This isn't generic spam — you clearly looked at THEIR business specifically.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="guide-title">⚠️ THE PROBLEMS (30-40 seconds)</div>
+    <div class="guide-dialogue">
+      "There are a couple of specific things costing you calls every day. First, [explain Issue 1 in plain English with business impact]. Second, [explain Issue 2]. What this means is customers are literally finding your competitors instead of you — probably 5-10 calls a day you're missing out on."
+    </div>
+    <div class="guide-tip">
+      <strong>💡 How to explain issues in plain English:</strong><br><br>
+      ❌ Don't say: "Your H1 tag is missing"<br>
+      ✅ Do say: "Your site has no main heading, so Google can't figure out what you actually do"<br><br>
+      ❌ Don't say: "You need schema markup"<br>
+      ✅ Do say: "Your competitors show up with star ratings and phone numbers in Google. You show up as plain text."<br><br>
+      <strong>Always connect to:</strong> Lost calls, lost customers, competitors winning
+    </div>
+    <div style="margin-top:12px;padding:12px;background:var(--card2);border-radius:8px">
+      <div style="font-size:12px;font-weight:700;color:var(--orange);margin-bottom:8px">⚡ Common Issues Translation:</div>
+      <div style="font-size:13px;color:var(--text);opacity:0.9;line-height:1.8">
+        • <strong>Thin content</strong> → "Your site only has 150 words. Google needs 400+ to rank pages."<br>
+        • <strong>Not mobile optimized</strong> → "60% of searches are on phones. Your site doesn't work on mobile."<br>
+        • <strong>No address visible</strong> → "Google won't rank you for 'plumber near me' without seeing your address. That's 70% of local searches."<br>
+        • <strong>No phone number</strong> → "People want to call NOW. They can't find your number in 3 seconds, they're gone."
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="guide-title">🔄 THE TRANSITION (10 seconds)</div>
+    <div class="guide-dialogue">
+      "Look, I know you're busy running a plumbing business, not worrying about websites. That's exactly why I'm calling — this stuff is my job, not yours."
+    </div>
+    <div class="guide-tip">
+      <strong>💡 Why this works:</strong> Acknowledges they're busy. Shows empathy. Positions you as the expert who handles this FOR them.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="guide-title">🎁 THE OFFER (15 seconds)</div>
+    <div class="guide-dialogue">
+      "What I'd like to do is send you a free breakdown of what I found. It's a 5-minute read, shows you exactly what's wrong and how to fix it. Completely free, no strings attached. I'm not going to call you back trying to sell you something."
+    </div>
+    <div class="guide-tip">
+      <strong>💡 Why this works:</strong> "Free" said three times. "5 minutes" = small commitment. "No strings" removes pressure. "Not going to call back" = huge relief.
+    </div>
+  </div>
+
+  <div class="guide-section">
+    <div class="guide-title">🤝 THE CLOSE (10 seconds)</div>
+    <div class="guide-dialogue">
+      "If that sounds useful, what's the best email address to send it to?"
+    </div>
+    <div class="guide-tip">
+      <strong>💡 Why this works:</strong> Assumes the sale ("if that sounds useful" not "would you like"). Asking for email is softer than booking a meeting.
+    </div>
+  </div>
+
+  <div style="margin-top:24px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:12px">
+    <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:16px">🛡️ Common Objections</div>
+    
+    <div style="margin-bottom:16px;padding:14px;background:var(--card2);border-radius:8px">
+      <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px">"I'm too busy"</div>
+      <div style="font-size:14px;color:var(--text);opacity:0.9;line-height:1.7">
+        "Totally understand — you're running a business! Can I grab 90 seconds now to explain what I found? If it sounds useful I'll email details. If not, no worries."
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;padding:14px;background:var(--card2);border-radius:8px">
+      <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px">"We already have a website"</div>
+      <div style="font-size:14px;color:var(--text);opacity:0.9;line-height:1.7">
+        "Yeah absolutely — I saw it. The issue isn't that you don't have a site, it's that Google isn't ranking it. Having a website nobody can find is like having a billboard in your basement."
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;padding:14px;background:var(--card2);border-radius:8px">
+      <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px">"How much?"</div>
+      <div style="font-size:14px;color:var(--text);opacity:0.9;line-height:1.7">
+        "Great question — but I'm not trying to sell you anything on this call. I just want to send you the free breakdown. Once you've read it, if you want to chat about costs, we can."
+      </div>
+    </div>
+
+    <div style="padding:14px;background:var(--card2);border-radius:8px">
+      <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:6px">"Send me an email"</div>
+      <div style="font-size:14px;color:var(--text);opacity:0.9;line-height:1.7">
+        "Perfect, I will — what's your email? Also, just so you know what to expect: it'll be a short PDF showing the 3 main things Google doesn't like about your site, and rough costs to fix each. That's it."
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+</div>
+
+<!-- CALL SCRIPT MODAL -->
+<div class="modal" id="scriptModal" onclick="if(event.target===this)closeScript()">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">📞 Custom Call Script</div>
+      <button class="modal-close" onclick="closeScript()">×</button>
+    </div>
+    <div class="modal-body" id="scriptContent"></div>
+    <div class="modal-footer" id="scriptFooter"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API='http://localhost:5000/api';
+let leads=[],queue=[],sent=0,allLeads=[],filteredLeads=[],callHistory=[],pollTimer;
+let database=[],filteredDB=[];
+const SC=['pending','sent','opened','replied','called'];
+const SL={pending:'⬜ Pending',sent:'📤 Sent',opened:'👁 Opened',replied:'💬 Replied',called:'📞 Called'};
+const SCL={pending:'pp',sent:'ps',opened:'po',replied:'pr',called:'pc'};
+
+// Persistence
+function loadState(){
+  const h=localStorage.getItem('callHistory');
+  if(h){try{callHistory=JSON.parse(h)}catch{}}
+  const l=localStorage.getItem('leads');
+  if(l){try{leads=JSON.parse(l)}catch{}}
+  renderHistory();renderLeads();updateStats();
+}
+function saveState(){
+  localStorage.setItem('callHistory',JSON.stringify(callHistory));
+  localStorage.setItem('leads',JSON.stringify(leads));
+}
+
+async function checkBackend(){
+  try{await fetch(API+'/job/test',{signal:AbortSignal.timeout(2000)});setConnected(true)}
+  catch{try{await fetch(API+'/job/test');setConnected(true)}catch{setConnected(false)}}
+}
+
+function setConnected(ok){
+  document.getElementById('connDot').className='ldot'+(ok?' connected':'');
+  document.getElementById('connTxt').textContent=ok?'Backend connected':'Backend offline';
+  const b=document.getElementById('beStatus');
+  b.className='be-status '+(ok?'be-online':'be-offline');
+  b.innerHTML=ok?'✅ Backend connected — real scraping active':'⚠️ Backend not running — double-click RUN.bat';
+  document.getElementById('searchBtn').disabled=!ok;
+}
+
+const titles={bulk:'Live Lead Search',database:'Business Database',queue:'Approval Queue',leads:'Leads Tracker',history:'Call History',sequence:'Email Sequence',guide:'Call Guide'};
+function go(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('pageTitle').textContent=titles[id]||id;
+}
+
+async function runSearch(){
+  const trade=document.getElementById('bTrade').value.trim();
+  const city=document.getElementById('bCity').value.trim();
+  if(!city){showErr('searchErr','Enter a city');return}
+  hideErr('searchErr');
+
+  const btn=document.getElementById('searchBtn');
+  btn.disabled=true;btn.classList.add('loading');
+  document.getElementById('searchTxt').textContent='Searching...';
+  document.getElementById('jobPanel').style.display='block';
+  document.getElementById('filterBar').style.display='flex';
+  document.getElementById('leadsList').innerHTML='';
+  document.getElementById('logBox').innerHTML='';
+  document.getElementById('progBar').style.width='0%';
+  document.getElementById('resultSummary').textContent='';
+
+  try{
+    const res=await fetch(API+'/search',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({trade,city,count:parseInt(document.getElementById('bCount').value),emailType:document.getElementById('bType').value})
+    });
+    const data=await res.json();
+    if(data.job_id){pollJob(data.job_id)}
+    else{showErr('searchErr','Job start failed');btn.disabled=false;btn.classList.remove('loading')}
+  }catch{
+    showErr('searchErr','Cannot reach backend. Is RUN.bat running?');
+    btn.disabled=false;btn.classList.remove('loading');
+    document.getElementById('searchTxt').textContent='🔍 Find Real Leads';
+  }
+}
+
+function pollJob(jobId){
+  clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{
+    try{
+      const res=await fetch(API+'/job/'+jobId);
+      const job=await res.json();
+      const logBox=document.getElementById('logBox');
+      logBox.innerHTML=job.log.map(l=>`<div class="log-line">${l}</div>`).join('');
+      logBox.scrollTop=logBox.scrollHeight;
+      const pct=job.total>0?Math.round((job.progress/job.total)*100):0;
+      document.getElementById('progBar').style.width=pct+'%';
+      document.getElementById('progTxt').textContent=`${job.progress} / ${job.total} processed`;
+      document.getElementById('jobTitle').textContent=job.status==='complete'?'✅ Complete':'⚙ Running';
+
+      allLeads=job.leads||[];
+      applyFilters();
+
+      if(job.status==='complete'||job.status==='error'){
+        clearInterval(pollTimer);
+        const btn=document.getElementById('searchBtn');
+        btn.disabled=false;btn.classList.remove('loading');
+        document.getElementById('searchTxt').textContent='🔍 Find Real Leads';
+        const ready=allLeads.filter(l=>l.status==='ready').length;
+        const noemail=allLeads.filter(l=>l.status==='no_email').length;
+        document.getElementById('resultSummary').textContent=`${allLeads.length} found — ${ready} ready, ${noemail} no email`;
+        toast(job.status==='complete'?`🎉 ${ready} emails ready`:'❌ Job failed');
+        loadDatabase(); // Refresh database after search completes
+      }
+    }catch(e){console.error(e)}
+  },1500);
+}
+
+function applyFilters(){
+  const scoreLimit=parseInt(document.getElementById('filterScore').value);
+  const emailFilter=document.getElementById('filterEmail').value;
+  filteredLeads=allLeads.filter(l=>{
+    if(scoreLimit>0&&(l.seoScore||0)>=scoreLimit)return false;
+    if(emailFilter==='has'&&!l.email)return false;
+    if(emailFilter==='none'&&l.email)return false;
+    return true;
+  });
+  document.getElementById('filterCount').textContent=filteredLeads.length;
+  renderBulkLeads(filteredLeads);
+}
+
+function renderBulkLeads(jobLeads){
+  const el=document.getElementById('leadsList');
+  el.innerHTML=jobLeads.map((l,i)=>{
+    const scoreClass=l.seoScore<30?'score-poor':l.seoScore<50?'score-avg':'score-ok';
+    const cardClass=l.status==='ready'?'ready':'';
+    const issuesHtml=(l.seoIssues||[]).slice(0,3).map(issue=>`<span class="issue-tag it-${issue.severity||'orange'}">${issue.title}</span>`).join('');
+
+    return`<div class="lead-card ${cardClass}">
+      <div class="lc-score ${scoreClass}">${l.seoScore||'?'}<div style="font-size:9px;color:var(--muted);font-weight:500">/100</div></div>
+      <div class="lc-info">
+        <div class="lc-name">${l.name}</div>
+        <div class="lc-meta">
+          ${l.website?`🌐 ${l.website.replace('https://','').replace('http://','')}<br>`:' No website<br>'}
+          ${l.email?`✉️ ${l.email}`:' No email'}
+          ${l.phone?` · 📞 ${l.phone}`:''}
+          ${l.rating?` · ⭐ ${l.rating} (${l.reviews} reviews)`:''}
+        </div>
+        ${issuesHtml?`<div class="lc-issues">${issuesHtml}</div>`:''}
+      </div>
+      <div class="lc-actions">
+        ${l.status==='ready'?`
+          <button class="btn bpri bsm" onclick="openCallScript(${i})">📞 Call Script</button>
+          <button class="btn bout bsm" onclick="sendBulk(${i})">📧 Email</button>
+          <button class="btn bout bsm" onclick="saveBulk(${i})">💾 Save</button>
+        `:'<div style="font-size:11px;color:var(--muted);text-align:center">Analysing...</div>'}
+      </div>
+    </div>`;
+  }).join('');
+  window._filteredLeads=jobLeads;
+}
+
+async function openCallScript(idx){
+  const l=window._filteredLeads?.[idx];
+  if(!l)return;
+
+  document.getElementById('scriptModal').classList.add('show');
+  document.getElementById('scriptContent').innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">🤖 Generating custom script...</div>';
+  document.getElementById('scriptFooter').innerHTML='';
+
+  const city=document.getElementById('bCity').value.trim()||'Leicester';
+
+  try{
+    const res=await fetch(API+'/generate-call-script',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({company:l,location:city})
+    });
+    const data=await res.json();
+    renderCallScript(l,data);
+  }catch(e){
+    document.getElementById('scriptContent').innerHTML='<div style="padding:40px;text-align:center;color:var(--red)">❌ Script generation failed</div>';
+    console.error(e);
+  }
+}
+
+function renderCallScript(lead,data){
+  const scriptCol=`
+    <div style="flex:1">
+      <div class="script-intro">
+        <div class="script-intro-title">📊 ${lead.name} — SEO Score: ${data.score||lead.seoScore}/100</div>
+        <div class="script-intro-text">${lead.website||''} ${lead.email?'· '+lead.email:''} ${lead.phone?'· '+lead.phone:''}</div>
+      </div>
+      ${renderScriptSections(data.script)}
+      ${renderIssuesBreakdown(data.issues_breakdown)}
+    </div>
+  `;
+
+  const notesCol=`
+    <div class="notes-col">
+      <div class="notes-title">📝 CALL NOTES</div>
+      <textarea class="notes-area" id="callNotes" placeholder="Track what happened:
+• Left voicemail
+• Spoke to owner
+• Follow up Friday
+• Not interested"></textarea>
+      <div class="call-outcome">
+        <div class="notes-title" style="margin-top:16px">OUTCOME</div>
+        <div class="outcome-btns">
+          <button class="btn bpri bsm" onclick="saveCall('${escapeSafe(lead.name)}','${escapeSafe(lead.email||'')}','${escapeSafe(lead.website||'')}',${data.score||0},'interested')">✅ Interested</button>
+          <button class="btn bout bsm" onclick="saveCall('${escapeSafe(lead.name)}','${escapeSafe(lead.email||'')}','${escapeSafe(lead.website||'')}',${data.score||0},'followup')">📅 Follow Up</button>
+          <button class="btn bout bsm" onclick="saveCall('${escapeSafe(lead.name)}','${escapeSafe(lead.email||'')}','${escapeSafe(lead.website||'')}',${data.score||0},'voicemail')">📞 Voicemail</button>
+          <button class="btn bout bsm" onclick="saveCall('${escapeSafe(lead.name)}','${escapeSafe(lead.email||'')}','${escapeSafe(lead.website||'')}',${data.score||0},'not_interested')">❌ Not Interested</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('scriptContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:24px">
+      ${scriptCol}
+      ${notesCol}
+    </div>
+  `;
+  
+  document.getElementById('scriptFooter').innerHTML=`
+    <button class="btn bout" onclick="closeScript()">Close</button>
+  `;
+}
+
+function renderScriptSections(scriptText){
+  let html='';
+  const lines=scriptText.split('\n');
+  let currentSection='';
+  let currentText=[];
+
+  lines.forEach(line=>{
+    const trimmed=line.trim();
+    if(trimmed.match(/^[A-Z\s]+(\(|:|\d)/i)||trimmed.match(/^\d+\./)){
+      if(currentSection&&currentText.length>0){
+        html+=`<div class="script-section">
+          <div class="script-heading">${currentSection}</div>
+          <div class="script-text">${currentText.join('\n').trim()}</div>
+        </div>`;
+      }
+      currentSection=trimmed;
+      currentText=[];
+    }else if(trimmed){
+      currentText.push(line);
+    }
+  });
+
+  if(currentSection&&currentText.length>0){
+    html+=`<div class="script-section">
+      <div class="script-heading">${currentSection}</div>
+      <div class="script-text">${currentText.join('\n').trim()}</div>
+    </div>`;
+  }
+
+  return html;
+}
+
+function renderIssuesBreakdown(issues){
+  if(!issues||issues.length===0)return'';
+  
+  let html=`<div class="breakdown-section">
+    <div class="breakdown-title">📚 What These Issues Mean (For Your Reference)</div>`;
+  
+  issues.forEach(issue=>{
+    const sevClass=(issue.severity==='very high'||issue.severity==='high'||issue.severity==='critical')?'sev-high':'sev-medium';
+    html+=`<div class="breakdown-item">
+      <div class="breakdown-issue">
+        ${issue.issue}
+        <span class="severity-badge ${sevClass}">${issue.severity} impact</span>
+      </div>
+      <div class="breakdown-exp">${issue.explanation}</div>
+    </div>`;
+  });
+  
+  html+=`</div>`;
+  return html;
+}
+
+function escapeSafe(str){
+  return(str||'').replace(/'/g,"\\'").replace(/"/g,'\\"');
+}
+
+function saveCall(name,email,website,score,outcome){
+  const notes=document.getElementById('callNotes').value;
+  callHistory.push({name,email,website,score,outcome,notes,date:new Date().toISOString()});
+  saveState();renderHistory();closeScript();updateStats();
+  toast(`📞 Call logged: ${outcome}`);
+}
+
+function closeScript(){document.getElementById('scriptModal').classList.remove('show')}
+
+function renderHistory(){
+  const el=document.getElementById('historyList');
+  if(!callHistory.length){el.innerHTML='<div class="empty">📭 No calls logged yet</div>';return}
+  el.innerHTML=callHistory.slice().reverse().map((h,i)=>`
+    <div class="lead-card">
+      <div style="flex:1">
+        <div class="lc-name">${h.name} <span style="font-weight:400;font-size:13px;color:var(--muted)">(Score: ${h.score||'?'}/100)</span></div>
+        <div class="lc-meta">
+          ${h.email||'No email'} ${h.website?'· '+h.website:''}<br>
+          📅 ${new Date(h.date).toLocaleDateString()} at ${new Date(h.date).toLocaleTimeString()}<br>
+          ${h.notes?`📝 ${h.notes}`:''}
+        </div>
+      </div>
+      <div class="lc-actions">
+        <div style="padding:6px 10px;background:var(--card2);border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase;text-align:center">${h.outcome}</div>
+        <button class="btn bred bsm" onclick="callHistory.splice(${callHistory.length-1-i},1);saveState();renderHistory();updateStats()">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function sendBulk(idx){
+  const l=window._filteredLeads?.[idx];
+  if(!l||!l.email)return;
+  window.location.href=`mailto:${encodeURIComponent(l.email)}?subject=${encodeURIComponent(l.subject||'')}&body=${encodeURIComponent(l.body||'')}`;
+  sent++;
+  leads.push({id:Date.now(),domain:l.website||l.name,email:l.email,name:l.name,score:l.seoScore,type:'cold',status:'sent',date:new Date().toLocaleDateString('en-GB')});
+  saveState();updateStats();renderLeads();
+  toast('📤 Opened in email!');
+}
+
+function saveBulk(idx){
+  const l=window._filteredLeads?.[idx];
+  if(!l)return;
+  leads.push({id:Date.now(),domain:l.website||l.name,email:l.email||'—',name:l.name,score:l.seoScore,type:'cold',status:'pending',date:new Date().toLocaleDateString('en-GB')});
+  saveState();updateStats();renderLeads();
+  toast('💾 Saved!');
+}
+
+// Database functions
+async function loadDatabase(){
+  try{
+    const res=await fetch(API+'/database');
+    database=await res.json();
+    applyDBFilters();
+    document.getElementById('dbBadge').textContent=database.length;
+  }catch(e){console.error('DB load failed:',e)}
+}
+
+function applyDBFilters(){
+  const scoreLimit=parseInt(document.getElementById('dbFilterScore').value);
+  const statusFilter=document.getElementById('dbFilterStatus').value;
+  const emailFilter=document.getElementById('dbFilterEmail').value;
+  
+  filteredDB=database.filter(b=>{
+    if(scoreLimit>0&&b.seoScore>=scoreLimit)return false;
+    if(statusFilter!=='all'&&b.status!==statusFilter)return false;
+    if(emailFilter==='has'&&!b.email)return false;
+    if(emailFilter==='none'&&b.email)return false;
+    return true;
+  });
+  
+  document.getElementById('dbFilterCount').textContent=filteredDB.length;
+  renderDatabase();
+}
+
+function renderDatabase(){
+  const el=document.getElementById('databaseList');
+  if(!filteredDB.length){el.innerHTML='<div class="empty">📭 No businesses match filters</div>';return}
+  
+  el.innerHTML=filteredDB.map((b,i)=>{
+    const scoreClass=b.seoScore<30?'score-poor':b.seoScore<50?'score-avg':'score-ok';
+    const issuesHtml=(b.seoIssues||[]).slice(0,3).map(issue=>`<span class="issue-tag it-${issue.severity||'orange'}">${issue.title}</span>`).join('');
+    
+    return`<div class="lead-card">
+      <div class="lc-score ${scoreClass}">${b.seoScore||'?'}<div style="font-size:9px;color:var(--muted);font-weight:500">/100</div></div>
+      <div class="lc-info">
+        <div class="lc-name">${b.name} <span style="font-weight:400;font-size:12px;color:var(--muted)">· ${b.city||''}</span></div>
+        <div class="lc-meta">
+          ${b.domain?`🌐 ${b.domain}<br>`:' '}
+          ${b.email?`✉️ ${b.email}`:' No email'}
+          ${b.phone?` · 📞 ${b.phone}`:''}
+        </div>
+        ${issuesHtml?`<div class="lc-issues">${issuesHtml}</div>`:''}
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">Added: ${b.firstSeen||'—'}</div>
+      </div>
+      <div class="lc-actions">
+        <select class="btn bout bsm" onchange="updateDBStatus(${b.id},this.value)" style="cursor:pointer;padding:6px 10px;font-size:13px;text-align:left">
+          <option value="pending" ${b.status==='pending'?'selected':''}>⬜ Pending</option>
+          <option value="called" ${b.status==='called'?'selected':''}>📞 Called</option>
+          <option value="contacted" ${b.status==='contacted'?'selected':''}>✅ Contacted</option>
+        </select>
+        <button class="btn bpri bsm" onclick="openCallScriptDB(${i})">📞 Call Script</button>
+        ${b.email?`<button class="btn bout bsm" onclick="emailFromDB(${i})">📧 Email</button>`:'<button class="btn bout bsm" disabled style="opacity:0.3">❌ No Email</button>'}
+        <button class="btn bout bsm" onclick="addToLeads(${b.id})">📋 Add to Leads</button>
+        <button class="btn bred bsm" onclick="deleteFromDB(${b.id})">🗑 Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+  window._filteredDB=filteredDB;
+}
+
+async function updateDBStatus(bizId,newStatus){
+  try{
+    await fetch(API+`/database/${bizId}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({status:newStatus})
+    });
+    const biz=database.find(b=>b.id===bizId);
+    if(biz)biz.status=newStatus;
+    applyDBFilters();
+    toast('✅ Status updated');
+  }catch(e){toast('❌ Update failed')}
+}
+
+async function openCallScriptDB(idx){
+  const b=window._filteredDB?.[idx];
+  if(!b)return;
+  
+  document.getElementById('scriptModal').classList.add('show');
+  document.getElementById('scriptContent').innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">🤖 Generating unique script...</div>';
+  document.getElementById('scriptFooter').innerHTML='';
+  
+  try{
+    const res=await fetch(API+'/generate-call-script',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({company:b,location:b.city||'Leicester'})
+    });
+    const data=await res.json();
+    renderCallScript(b,data);
+  }catch(e){
+    document.getElementById('scriptContent').innerHTML='<div style="padding:40px;text-align:center;color:var(--red)">❌ Script generation failed</div>';
+    console.error(e);
+  }
+}
+
+function emailFromDB(idx){
+  const b=window._filteredDB?.[idx];
+  if(!b||!b.email){toast('No email found');return}
+  window.location.href=`mailto:${encodeURIComponent(b.email)}`;
+  toast('📧 Opened email client');
+}
+
+function addToLeads(bizId){
+  const biz=database.find(b=>b.id===bizId);
+  if(!biz)return;
+  leads.push({
+    id:Date.now(),
+    domain:biz.domain,
+    email:biz.email||'',
+    name:biz.name,
+    score:biz.seoScore,
+    type:'cold',
+    status:'pending',
+    date:new Date().toLocaleDateString('en-GB')
+  });
+  saveState();updateStats();renderLeads();
+  toast('📋 Added to leads tracker!');
+}
+
+async function deleteFromDB(bizId){
+  if(!confirm('Delete this business from database permanently?'))return;
+  try{
+    await fetch(API+`/database/${bizId}`,{method:'DELETE'});
+    database=database.filter(b=>b.id!==bizId);
+    applyDBFilters();updateStats();
+    toast('🗑 Deleted from database');
+  }catch(e){toast('❌ Delete failed')}
+}
+
+// Queue, Leads, other functions (same as before - truncated for space)
+function renderQueue(){
+  const el=document.getElementById('queueList');
+  if(!queue.length){el.innerHTML='<div class="empty">✅ Queue clear!</div>';return}
+  el.innerHTML=queue.map(q=>`<div class="qcard">
+    <div class="qh"><div><div class="qname">${q.domain||q.name} — ${q.email}</div></div></div>
+    <div class="qbody">Subject: ${q.subject}\n\n${q.body}</div>
+    <div class="qfoot">
+      <button class="btn bpri bsm" onclick="approveQ(${q.id})">✅ Approve</button>
+      <button class="btn bout bsm" onclick="removeQ(${q.id})">🗑 Remove</button>
+    </div>
+  </div>`).join('')
+}
+
+function approveQ(id){
+  const item=queue.find(q=>q.id===id);
+  if(!item)return;
+  window.location.href=`mailto:${encodeURIComponent(item.email)}?subject=${encodeURIComponent(item.subject)}&body=${encodeURIComponent(item.body)}`;
+  sent++;queue=queue.filter(q=>q.id!==id);
+  updateStats();renderQueue();toast('📤 Opened email!');
+}
+function removeQ(id){queue=queue.filter(q=>q.id!==id);updateStats();renderQueue()}
+
+function cycleStatus(id){const l=leads.find(l=>l.id===id);if(!l)return;l.status=SC[(SC.indexOf(l.status)+1)%SC.length];saveState();updateStats();renderLeads()}
+function delLead(id){leads=leads.filter(l=>l.id!==id);saveState();updateStats();renderLeads()}
+function renderLeads(){
+  const w=document.getElementById('leadsBody');
+  if(!leads.length){w.innerHTML='<div class="empty">📭 No leads saved yet</div>';return}
+  w.innerHTML=`<table><thead><tr><th>Business</th><th>Email</th><th>Score</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>
+    ${leads.map(l=>`<tr>
+      <td><strong style="color:#fff">${l.domain}</strong>${l.name?`<br><span style="font-size:11px;color:var(--muted)">${l.name}</span>`:''}</td>
+      <td>${l.email}</td>
+      <td style="font-family:'JetBrains Mono',monospace;color:${l.score<30?'var(--red)':l.score<50?'var(--orange)':'var(--yellow)'}">${l.score}/100</td>
+      <td><span class="pill ${SCL[l.status]||'pp'}" onclick="cycleStatus(${l.id})" title="Click to update">${SL[l.status]||'⬜ Pending'}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${l.date}</td>
+      <td><button class="dbtn" onclick="delLead(${l.id})">✕</button></td>
+    </tr>`).join('')}</tbody></table>`
+}
+
+function exportCSV(){
+  if(!leads.length){toast('No leads to export!');return}
+  const h=['Business','Email','Name','Score','Type','Status','Date'];
+  const rows=leads.map(l=>[l.domain,l.email,l.name||'',l.score,l.type,l.status,l.date]);
+  const csv=[h,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='outreach-leads.csv';a.click();
+  toast('📥 Downloaded!');
+}
+
+function updateStats(){
+  const replied=leads.filter(l=>l.status==='replied').length;
+  document.getElementById('sSent').textContent=sent;
+  document.getElementById('sQueue').textContent=queue.length;
+  document.getElementById('sLeads').textContent=leads.length;
+  document.getElementById('sCalls').textContent=callHistory.length;
+  const qb=document.getElementById('qBadge');qb.textContent=queue.length;qb.style.display=queue.length?'inline':'none';
+  document.getElementById('lBadge').textContent=leads.length;
+  document.getElementById('hBadge').textContent=callHistory.length;
+  document.getElementById('dbBadge').textContent=database.length;
+}
+
+function toggleTheme(){
+  const body=document.body;
+  const isLight=body.classList.toggle('light');
+  document.getElementById('themeIcon').textContent=isLight?'🌙':'☀️';
+  document.getElementById('themeText').textContent=isLight?'Dark':'Light';
+  localStorage.setItem('theme',isLight?'light':'dark');
+}
+
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show')}
+function hideErr(id){document.getElementById(id).classList.remove('show')}
+let toastT;
+function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),3500)}
+
+// Initialize
+loadState();loadDatabase();checkBackend();
+setInterval(checkBackend,10000);
+setInterval(loadDatabase,30000);
+
+// Load saved theme
+const savedTheme=localStorage.getItem('theme');
+if(savedTheme==='light'){
+  document.body.classList.add('light');
+  document.getElementById('themeIcon').textContent='🌙';
+  document.getElementById('themeText').textContent='Dark';
+}
+
+// Register service worker for PWA
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(reg=>console.log('[PWA] Service worker registered'))
+      .catch(err=>console.log('[PWA] Service worker registration failed:',err));
+  });
+}
+</script>
+</body>
+</html>
