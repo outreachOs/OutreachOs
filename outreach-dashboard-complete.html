@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OutreachOS — Complete</title>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0c0e14;--card:#12151e;--card2:#181c28;--border:#232840;--border2:#2e3450;
+  --green:#00e87a;--gdim:rgba(0,232,122,0.1);--gborder:rgba(0,232,122,0.25);
+  --orange:#ff8c42;--odim:rgba(255,140,66,0.1);--oborder:rgba(255,140,66,0.25);
+  --red:#ff4466;--rdim:rgba(255,68,102,0.1);--rborder:rgba(255,68,102,0.25);
+  --blue:#4d9fff;--bdim:rgba(77,159,255,0.1);--bborder:rgba(77,159,255,0.25);
+  --yellow:#ffd93d;--text:#e0e4f0;--muted:#5a6080;--muted2:#3a3f58;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Familjen Grotesk',sans-serif;min-height:100vh}
+.shell{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+.sidebar{background:var(--card);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.logo-name{font-size:17px;font-weight:800;color:#fff;letter-spacing:-0.02em}
+.logo-tag{font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px}
+.nav{padding:0 10px;flex:1}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all 0.15s;user-select:none;margin-bottom:2px}
+.ni:hover{background:var(--card2);color:var(--text)}
+.ni.active{background:rgba(0,232,122,0.08);color:var(--green)}
+.nb{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:100px}
+.nb.g{background:var(--green);color:#0c0e14}
+.sfoot{padding:16px 20px 0;border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.ldot{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 2s infinite}
+.ldot.connected{background:var(--green)}
+.topbar{grid-column:2;background:var(--card);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.ptitle{font-size:16px;font-weight:700;color:#fff}
+.opill{display:flex;align-items:center;gap:6px;background:var(--bdim);border:1px solid var(--bborder);color:var(--blue);font-size:11px;font-weight:600;padding:5px 12px;border-radius:100px}
+.main{padding:24px 28px 80px;overflow-y:auto}
+.page{display:none}.page.active{display:block;animation:fadeUp 0.2s ease}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.stat.acc{background:var(--green);border-color:var(--green)}
+.slbl{font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.stat.acc .slbl{color:rgba(0,0,0,0.5)}
+.sval{font-size:30px;font-weight:800;color:#fff;letter-spacing:-0.03em;line-height:1}
+.stat.acc .sval{color:#0c0e14}
+.ssub{font-size:11px;color:var(--muted);margin-top:4px}
+.stat.acc .ssub{color:rgba(0,0,0,0.4)}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.ph{padding:13px 18px;background:var(--card2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.pt{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+.pb{padding:18px}
+label{display:block;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+input,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Familjen Grotesk',sans-serif;font-size:14px;padding:10px 14px;outline:none;transition:border-color 0.15s}
+input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,232,122,0.07)}
+input::placeholder{color:var(--muted)}
+select option{background:var(--card2)}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;font-family:'Familjen Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;border:none;padding:10px 16px;white-space:nowrap}
+.bpri{background:var(--green);color:#0c0e14}
+.bpri:hover{background:#00d46e;transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,232,122,0.2)}
+.bpri:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none}
+.bout{background:transparent;border:1px solid var(--border2);color:var(--muted)}
+.bout:hover{border-color:var(--green);color:var(--green)}
+.bred{background:var(--rdim);border:1px solid var(--rborder);color:var(--red)}
+.bfull{width:100%;margin-top:14px;padding:13px;font-size:14px}
+.bsm{padding:6px 12px;font-size:11px}
+.spin-i{width:14px;height:14px;border:2px solid rgba(0,0,0,0.2);border-top-color:#0c0e14;border-radius:50%;animation:rot 0.7s linear infinite;display:none}
+.bpri.loading .spin-i{display:block}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:12px;align-items:center;padding:14px;background:rgba(35,40,64,0.3);border-radius:10px;margin-bottom:16px;flex-wrap:wrap}
+.filter-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+.filter-select{width:auto;min-width:150px;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:6px;font-size:12px}
+
+.be-status{padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.be-offline{background:var(--rdim);border:1px solid var(--rborder);color:#ff8099}
+.be-online{background:var(--gdim);border:1px solid var(--gborder);color:var(--green)}
+
+.log-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);height:160px;overflow-y:auto;margin:14px 0;line-height:1.7}
+.log-box .log-line{margin-bottom:2px}
+.prog-wrap{background:var(--bg);border:1px solid var(--border);border-radius:100px;height:8px;margin:10px 0;overflow:hidden}
+.prog-bar{height:100%;background:var(--green);border-radius:100px;transition:width 0.4s ease;width:0%}
+
+.lead-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;animation:fadeUp 0.2s ease}
+.lead-card.ready{border-color:var(--gborder);background:rgba(0,232,122,0.03)}
+.lead-card.no_email{opacity:0.5}
+.lead-card.analysing{border-color:rgba(255,217,61,0.3)}
+.lc-info{flex:1;min-width:180px}
+.lc-name{font-size:14px;font-weight:700;color:#fff;margin-bottom:3px}
+.lc-meta{font-size:12px;color:var(--muted);line-height:1.6}
+.lc-issues{margin-top:6px}
+.issue-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;margin:2px 2px 2px 0}
+.it-red{background:var(--rdim);color:var(--red);border:1px solid var(--rborder)}
+.it-orange{background:var(--odim);color:var(--orange);border:1px solid var(--oborder)}
+.it-yellow{background:rgba(255,217,61,0.1);color:var(--yellow);border:1px solid rgba(255,217,61,0.25)}
+.lc-score{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;text-align:center;min-width:60px;padding-top:4px}
+.score-poor{color:var(--red)}.score-avg{color:var(--orange)}.score-ok{color:var(--yellow)}
+.lc-actions{display:flex;flex-direction:column;gap:6px;min-width:140px}
+.lc-status{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:4px 0;text-align:center}
+
+/* Queue */
+.qcard{background:var(--card);border:1px solid var(--oborder);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.qh{padding:12px 16px;background:var(--odim);border-bottom:1px solid var(--oborder);display:flex;align-items:center;justify-content:space-between}
+.qname{font-size:14px;font-weight:700;color:#fff}
+.qwhy{font-size:11px;color:var(--orange);font-weight:600;margin-top:2px}
+.qbody{padding:14px 16px;font-size:12px;line-height:1.7;color:#8090b0;white-space:pre-wrap;max-height:120px;overflow-y:auto;font-family:'JetBrains Mono',monospace}
+.qfoot{padding:10px 16px;border-top:1px solid var(--border);background:var(--card2);display:flex;gap:8px}
+
+/* Leads table */
+.twrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);padding:11px 16px;text-align:left;background:var(--card2);border-bottom:1px solid var(--border)}
+td{padding:11px 16px;font-size:13px;border-bottom:1px solid rgba(35,40,64,0.8);color:#a0a8c0;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,0.01)}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:100px;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.pill:hover{opacity:0.7}
+.pp{background:rgba(90,96,128,0.15);color:var(--muted);border-color:var(--border2)}
+.ps{background:var(--bdim);color:var(--blue);border-color:var(--bborder)}
+.po{background:rgba(255,217,61,0.1);color:var(--yellow);border-color:rgba(255,217,61,0.25)}
+.pr{background:var(--gdim);color:var(--green);border-color:var(--gborder)}
+.pc{background:var(--odim);color:var(--orange);border-color:var(--oborder)}
+.dbtn{background:transparent;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:4px 8px;border-radius:4px;transition:all 0.15s}
+.dbtn:hover{color:var(--red);background:var(--rdim)}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13px}
+.err-box{background:var(--rdim);border:1px solid var(--rborder);border-radius:8px;color:var(--red);font-size:12px;padding:10px 14px;margin-top:10px;display:none}
+.err-box.show{display:block}
+.toast{position:fixed;bottom:24px;right:24px;background:#fff;color:#0c0e14;font-size:13px;font-weight:700;padding:12px 18px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:9999;display:none;align-items:center;gap:8px}
+.toast.show{display:flex;animation:toastIn 0.3s ease}
+
+/* Modal for call script */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal.show{display:flex;animation:fadeUp 0.2s ease}
+.modal-content{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;position:relative}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);background:var(--card2);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:18px;font-weight:700;color:#fff}
+.modal-close{background:transparent;border:none;color:var(--muted);font-size:28px;cursor:pointer;padding:0;line-height:1;transition:color 0.15s}
+.modal-close:hover{color:var(--red)}
+.modal-body{padding:24px}
+.script-intro{padding:14px;background:rgba(0,232,122,0.08);border:1px solid var(--gborder);border-radius:10px;margin-bottom:20px}
+.script-intro-title{font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px}
+.script-intro-text{font-size:12px;color:var(--muted);line-height:1.6}
+.script-section{margin-bottom:20px;padding:16px;background:rgba(35,40,64,0.3);border-radius:10px}
+.script-heading{font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.script-text{font-size:14px;line-height:1.8;color:var(--text);white-space:pre-wrap}
+.breakdown-section{margin-top:24px;padding-top:24px;border-top:1px solid var(--border)}
+.breakdown-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:12px}
+.breakdown-item{padding:12px;background:rgba(35,40,64,0.2);border-radius:8px;margin-bottom:8px}
+.breakdown-issue{font-size:12px;font-weight:700;color:#fff;margin-bottom:4px}
+.breakdown-exp{font-size:12px;color:var(--muted);line-height:1.6}
+.severity-badge{display:inline-block;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;margin-left:8px}
+.sev-high{background:rgba(255,68,102,0.2);color:var(--red)}
+.sev-medium{background:rgba(255,140,66,0.2);color:var(--orange)}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);background:var(--card2);display:flex;gap:10px;justify-content:flex-end}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rot{to{transform:rotate(360deg)}}
+@keyframes blink{50%{opacity:0.3}}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="logo"><div class="logo-name">OutreachOS</div><div class="logo-tag">Complete Edition</div></div>
+  <nav class="nav">
+    <div class="ni active" onclick="go('bulk',this)"><span>🔍</span> Live Search</div>
+    <div class="ni" onclick="go('database',this)"><span>🗄️</span> Database <span class="nb g" id="dbBadge">0</span></div>
+    <div class="ni" onclick="go('queue',this)"><span>🚩</span> Queue <span class="nb" id="qBadge" style="display:none">0</span></div>
+    <div class="ni" onclick="go('leads',this)"><span>📋</span> Leads <span class="nb g" id="lBadge">0</span></div>
+    <div class="ni" onclick="go('history',this)"><span>📞</span> Call History <span class="nb g" id="hBadge">0</span></div>
+    <div class="ni" onclick="go('sequence',this)"><span>📅</span> Sequence</div>
+    <div class="ni" onclick="go('callscript',this)"><span>📖</span> Call Guide</div>
+  </nav>
+  <div class="sfoot"><div class="ldot" id="connDot"></div><span id="connTxt">Checking...</span></div>
+</aside>
+
+<div style="display:flex;flex-direction:column;grid-column:2;min-height:100vh">
+<header class="topbar">
+  <div class="ptitle" id="pageTitle">Live Lead Search</div>
+  <div class="opill">📧 Outlook Ready</div>
+</header>
+<main class="main">
+
+<div class="stats">
+  <div class="stat acc"><div class="slbl">Emails Sent</div><div class="sval" id="sSent">0</div><div class="ssub">This session</div></div>
+  <div class="stat"><div class="slbl">In Queue</div><div class="sval" id="sQueue">0</div><div class="ssub">Awaiting review</div></div>
+  <div class="stat"><div class="slbl">Total Leads</div><div class="sval" id="sLeads">0</div><div class="ssub">Tracked</div></div>
+  <div class="stat"><div class="slbl">Calls Made</div><div class="sval" id="sCalls">0</div><div class="ssub">From tracker</div></div>
+</div>
+
+<!-- BULK SEARCH -->
+<div class="page active" id="page-bulk">
+  <div class="be-status be-offline" id="beStatus">⚠️ Backend not running — double-click RUN.bat</div>
+  <div class="panel">
+    <div class="ph"><span class="pt">🔍 Real Lead Finder</span></div>
+    <div class="pb">
+      <div class="f2" style="margin-bottom:12px">
+        <div class="field"><label>Trade</label><input type="text" id="bTrade" value="Plumbers" /></div>
+        <div class="field"><label>City / Area</label><input type="text" id="bCity" placeholder="Derby, Leicester..." /></div>
+      </div>
+      <div class="f2" style="margin-bottom:0">
+        <div class="field"><label>Number of leads</label>
+          <select id="bCount"><option value="10">10 leads</option><option value="20" selected>20 leads</option><option value="50">50 leads</option><option value="100">100 leads</option><option value="200">200 leads (slow)</option></select>
+        </div>
+        <div class="field"><label>Email Type</label>
+          <select id="bType"><option value="cold">Cold Intro</option><option value="audit">Free Audit</option><option value="followup">Follow Up</option></select>
+        </div>
+      </div>
+      <button class="btn bpri bfull" id="searchBtn" onclick="runSearch()">
+        <div class="spin-i"></div>
+        <span id="searchTxt">🔍 Find Real Leads</span>
+      </button>
+      <div class="err-box" id="searchErr"></div>
+    </div>
+  </div>
+
+  <div id="filterBar" class="filter-bar" style="display:none">
+    <span class="filter-label">Quick Filters:</span>
+    <select id="filterScore" class="filter-select" onchange="applyFilters()">
+      <option value="0">All SEO scores</option>
+      <option value="20">Below 20 (worst only)</option>
+      <option value="30">Below 30 (easy wins)</option>
+      <option value="40">Below 40</option>
+      <option value="50">Below 50</option>
+    </select>
+    <select id="filterEmail" class="filter-select" onchange="applyFilters()">
+      <option value="all">All leads</option>
+      <option value="has">Has email only</option>
+      <option value="none">No email (call only)</option>
+    </select>
+    <span style="margin-left:auto;font-size:12px;color:var(--muted)"><span id="filterCount">0</span> leads shown</span>
+  </div>
+
+  <div id="jobPanel" style="display:none">
+    <div class="panel">
+      <div class="ph"><span class="pt" id="jobTitle">⚙ Running Pipeline</span></div>
+      <div class="pb" style="padding-bottom:10px">
+        <div class="prog-wrap"><div class="prog-bar" id="progBar"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px" id="progTxt">Starting...</div>
+        <div class="log-box" id="logBox"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;margin-top:4px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)" id="resultSummary"></div>
+      <button class="btn bout bsm" onclick="sendAllReady()">📤 Send All Ready</button>
+    </div>
+    <div id="leadsList"></div>
+  </div>
+</div>
+
+<!-- QUEUE -->
+<div class="page" id="page-queue">
+  <div style="margin-bottom:18px"><div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px">🚩 Approval Queue</div><div style="font-size:12px;color:var(--muted)">Emails flagged for review</div></div>
+  <div id="queueList"></div>
+</div>
+
+<!-- LEADS -->
+<div class="page" id="page-leads">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div><div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px">📋 Leads Tracker</div><div style="font-size:12px;color:var(--muted)">Click status to update</div></div>
+    <button class="btn bout bsm" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+  <div class="twrap"><div id="leadsBody"></div></div>
+</div>
+
+<!-- CALL HISTORY -->
+<div class="page" id="page-history">
+  <div style="margin-bottom:18px">
+    <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px">📞 Call History</div>
+    <div style="font-size:12px;color:var(--muted)">All calls you've logged with scripts</div>
+  </div>
+  <div id="historyList"></div>
+</div>
+
+<!-- DATABASE -->
+<div class="page" id="page-database">
+  <div style="margin-bottom:18px">
+    <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px">🗄️ Business Database</div>
+    <div style="font-size:12px;color:var(--muted)">All businesses ever found — never search the same city twice</div>
+  </div>
+  <div id="filterBarDB" class="filter-bar">
+    <span class="filter-label">Filter:</span>
+    <select id="dbFilterScore" class="filter-select" onchange="applyDBFilters()">
+      <option value="0">All scores</option>
+      <option value="30" selected>Below 30 (best targets)</option>
+      <option value="40">Below 40</option>
+      <option value="50">Below 50</option>
+    </select>
+    <select id="dbFilterStatus" class="filter-select" onchange="applyDBFilters()">
+      <option value="all">All statuses</option>
+      <option value="pending">Pending only</option>
+      <option value="called">Called</option>
+      <option value="contacted">Contacted</option>
+    </select>
+    <select id="dbFilterEmail" class="filter-select" onchange="applyDBFilters()">
+      <option value="all">All</option>
+      <option value="has">Has email</option>
+      <option value="none">No email</option>
+    </select>
+    <span style="margin-left:auto;font-size:12px;color:var(--muted)"><span id="dbFilterCount">0</span> shown</span>
+  </div>
+  <div id="databaseList"></div>
+</div>
+
+<!-- SEQUENCE -->
+<div class="page" id="page-sequence">
+  <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:18px">📅 5-Touch Sequence</div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px"><div style="min-width:56px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center"><div style="font-size:18px">🧊</div><div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px">Day 0</div></div><div><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Cold Intro</div><div style="font-size:13px;color:var(--muted);line-height:1.6">First touch. Personalised to real site issues. Auto-sent for high confidence.</div></div></div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px"><div style="min-width:56px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center"><div style="font-size:18px">🔄</div><div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px">Day 3</div></div><div><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Follow Up</div><div style="font-size:13px;color:var(--muted);line-height:1.6">Brief nudge. Reference first email. Add one new insight.</div></div></div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px"><div style="min-width:56px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center"><div style="font-size:18px">📞</div><div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px">Day 5</div></div><div><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Cold Call</div><div style="font-size:13px;color:var(--muted);line-height:1.6">"I emailed about your Google ranking." Use Call Script feature.</div></div></div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px"><div style="min-width:56px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center"><div style="font-size:18px">🔍</div><div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px">Day 8</div></div><div><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Free Audit Offer</div><div style="font-size:13px;color:var(--muted);line-height:1.6">Strongest email. Gets the most replies.</div></div></div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:14px"><div style="min-width:56px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center"><div style="font-size:18px">👋</div><div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:3px">Day 14</div></div><div><div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px">Breakup Email</div><div style="font-size:13px;color:var(--muted);line-height:1.6">"Last one." Paradoxically gets high replies.</div></div></div>
+  </div>
+</div>
+
+<!-- CALL GUIDE -->
+<div class="page" id="page-callscript">
+  <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:18px">📖 Generic Call Guide</div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px">👋 Opening</div><div style="font-size:13px;color:#8090b0;font-style:italic;line-height:1.7">"Hey, is that [Name]? I'll be upfront — cold call about your Google visibility, I'll keep it quick. Is now okay?"</div><div style="font-size:11px;color:var(--green);margin-top:6px">💡 Honesty disarms them</div></div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px">🎯 Hook (10 sec)</div><div style="font-size:13px;color:#8090b0;font-style:italic;line-height:1.7">"I was searching for plumbers in [City] and your site wasn't coming up. I help local tradesmen rank higher — thought it was worth a chat."</div></div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px">✅ If They Listen</div><div style="font-size:13px;color:#8090b0;font-style:italic;line-height:1.7">"There are a few things stopping Google from ranking you that competitors are doing. I'd love to do a free audit and show you. No strings."</div></div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px"><div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px">🤝 Close</div><div style="font-size:13px;color:#8090b0;font-style:italic;line-height:1.7">"Can I send you a summary of what I found? Free, no strings. What's the best email?"</div></div>
+  </div>
+  <div style="margin-top:20px;padding:14px;background:rgba(0,232,122,0.08);border:1px solid var(--gborder);border-radius:10px">
+    <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px">💡 Pro Tip:</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.6">For custom scripts tailored to each business, click "📞 Call Script" on any lead in the search results — AI writes it based on their real SEO issues.</div>
+  </div>
+</div>
+
+</main>
+</div>
+</div>
+
+<!-- CALL SCRIPT MODAL -->
+<div class="modal" id="scriptModal" onclick="if(event.target===this)closeScript()">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">📞 Custom Call Script</div>
+      <button class="modal-close" onclick="closeScript()">×</button>
+    </div>
+    <div class="modal-body" id="scriptContent"></div>
+    <div class="modal-footer" id="scriptFooter"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API='http://localhost:5000/api';
+let leads=[],queue=[],sent=0,bulkLeads=[],allLeads=[],filteredLeads=[],callHistory=[],pollTimer;
+let database=[],filteredDB=[];
+const SC=['pending','sent','opened','replied','called'];
+const SL={pending:'⬜ Pending',sent:'📤 Sent',opened:'👁 Opened',replied:'💬 Replied',called:'📞 Called'};
+const SCL={pending:'pp',sent:'ps',opened:'po',replied:'pr',called:'pc'};
+
+// Persistence
+function loadState(){
+  const h=localStorage.getItem('callHistory');
+  if(h){try{callHistory=JSON.parse(h)}catch{}}
+  const l=localStorage.getItem('leads');
+  if(l){try{leads=JSON.parse(l)}catch{}}
+  renderHistory();renderLeads();updateStats();
+}
+function saveState(){
+  localStorage.setItem('callHistory',JSON.stringify(callHistory));
+  localStorage.setItem('leads',JSON.stringify(leads));
+}
+
+async function checkBackend(){
+  try{await fetch(API+'/job/test',{signal:AbortSignal.timeout(2000)});setConnected(true)}
+  catch{try{await fetch(API+'/job/test');setConnected(true)}catch{setConnected(false)}}
+}
+
+function setConnected(ok){
+  document.getElementById('connDot').className='ldot'+(ok?' connected':'');
+  document.getElementById('connTxt').textContent=ok?'Backend connected':'Backend offline';
+  const b=document.getElementById('beStatus');
+  b.className='be-status '+(ok?'be-online':'be-offline');
+  b.innerHTML=ok?'✅ Backend connected — real scraping active':'⚠️ Backend not running — double-click RUN.bat';
+  document.getElementById('searchBtn').disabled=!ok;
+}
+
+const titles={bulk:'Live Lead Search',database:'Business Database',queue:'Approval Queue',leads:'Leads Tracker',history:'Call History',sequence:'Email Sequence',callscript:'Call Guide'};
+function go(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('pageTitle').textContent=titles[id]||id;
+}
+
+async function runSearch(){
+  const trade=document.getElementById('bTrade').value.trim();
+  const city=document.getElementById('bCity').value.trim();
+  if(!city){showErr('searchErr','Enter a city');return}
+  hideErr('searchErr');
+
+  const btn=document.getElementById('searchBtn');
+  btn.disabled=true;btn.classList.add('loading');
+  document.getElementById('searchTxt').textContent='Searching...';
+  document.getElementById('jobPanel').style.display='block';
+  document.getElementById('filterBar').style.display='flex';
+  document.getElementById('leadsList').innerHTML='';
+  document.getElementById('logBox').innerHTML='';
+  document.getElementById('progBar').style.width='0%';
+  document.getElementById('resultSummary').textContent='';
+
+  try{
+    const res=await fetch(API+'/search',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({trade,city,count:parseInt(document.getElementById('bCount').value),emailType:document.getElementById('bType').value})
+    });
+    const data=await res.json();
+    if(data.job_id){pollJob(data.job_id)}
+    else{showErr('searchErr','Job start failed');btn.disabled=false;btn.classList.remove('loading')}
+  }catch{
+    showErr('searchErr','Cannot reach backend. Is RUN.bat running?');
+    btn.disabled=false;btn.classList.remove('loading');
+    document.getElementById('searchTxt').textContent='🔍 Find Real Leads';
+  }
+}
+
+function pollJob(jobId){
+  clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{
+    try{
+      const res=await fetch(API+'/job/'+jobId);
+      const job=await res.json();
+      const logBox=document.getElementById('logBox');
+      logBox.innerHTML=job.log.map(l=>`<div class="log-line">${l}</div>`).join('');
+      logBox.scrollTop=logBox.scrollHeight;
+      const pct=job.total>0?Math.round((job.progress/job.total)*100):0;
+      document.getElementById('progBar').style.width=pct+'%';
+      document.getElementById('progTxt').textContent=`${job.progress} / ${job.total} processed`;
+      document.getElementById('jobTitle').textContent=job.status==='complete'?'✅ Complete':'⚙ Running';
+
+      allLeads=job.leads||[];
+      applyFilters();
+
+      if(job.status==='complete'||job.status==='error'){
+        clearInterval(pollTimer);
+        const btn=document.getElementById('searchBtn');
+        btn.disabled=false;btn.classList.remove('loading');
+        document.getElementById('searchTxt').textContent='🔍 Find Real Leads';
+        const ready=allLeads.filter(l=>l.status==='ready').length;
+        const noemail=allLeads.filter(l=>l.status==='no_email').length;
+        document.getElementById('resultSummary').textContent=`${allLeads.length} found — ${ready} ready, ${noemail} no email`;
+        toast(job.status==='complete'?`🎉 ${ready} emails ready to send`:'❌ Job failed');
+      }
+    }catch(e){console.error(e)}
+  },1500);
+}
+
+function applyFilters(){
+  const scoreLimit=parseInt(document.getElementById('filterScore').value);
+  const emailFilter=document.getElementById('filterEmail').value;
+  filteredLeads=allLeads.filter(l=>{
+    if(scoreLimit>0&&(l.seoScore||0)>=scoreLimit)return false;
+    if(emailFilter==='has'&&!l.email)return false;
+    if(emailFilter==='none'&&l.email)return false;
+    return true;
+  });
+  document.getElementById('filterCount').textContent=filteredLeads.length;
+  renderBulkLeads(filteredLeads);
+}
+
+function renderBulkLeads(jobLeads){
+  const el=document.getElementById('leadsList');
+  el.innerHTML=jobLeads.map((l,i)=>{
+    const scoreClass=l.seoScore<30?'score-poor':l.seoScore<50?'score-avg':'score-ok';
+    const cardClass=l.status==='ready'?'ready':l.status==='no_email'?'no_email':'';
+    const issuesHtml=(l.seoIssues||[]).slice(0,3).map(issue=>`<span class="issue-tag it-${issue.severity||'orange'}">${issue.title}</span>`).join('');
+
+    return`<div class="lead-card ${cardClass}">
+      <div class="lc-score ${scoreClass}">${l.seoScore||'?'}<div style="font-size:9px;color:var(--muted);font-weight:500">/100</div></div>
+      <div class="lc-info">
+        <div class="lc-name">${l.name}</div>
+        <div class="lc-meta">
+          ${l.website?`🌐 ${l.website.replace('https://','').replace('http://','')}<br>`:' No website<br>'}
+          ${l.email?`✉️ ${l.email}`:' No email'}
+          ${l.phone?` · 📞 ${l.phone}`:''}
+          ${l.rating?` · ⭐ ${l.rating} (${l.reviews} reviews)`:''}
+        </div>
+        ${issuesHtml?`<div class="lc-issues">${issuesHtml}</div>`:''}
+      </div>
+      <div class="lc-actions">
+        <div class="lc-status" style="color:${l.status==='ready'?'var(--green)':l.status==='no_email'?'var(--red)':'var(--yellow)'}">${
+          l.status==='ready'?'✅ Ready':
+          l.status==='analysing'?'⏳ Analysing':
+          l.status==='no_email'?'❌ No email':l.status
+        }</div>
+        ${l.status==='ready'?`
+          <button class="btn bpri bsm" onclick="openCallScript(${i})">📞 Call Script</button>
+          <button class="btn bout bsm" onclick="sendBulk(${i})">📧 Email</button>
+          <button class="btn bout bsm" onclick="flagBulk(${i})">🚩 Flag</button>
+          <button class="btn bout bsm" onclick="saveBulk(${i})">💾 Save</button>
+        `:l.status==='no_email'?`
+          <button class="btn bout bsm" style="font-size:10px" onclick="manualEmail(${i})">+ Add Email</button>
+        `:''}
+      </div>
+    </div>`;
+  }).join('');
+  window._filteredLeads=jobLeads;
+}
+
+async function openCallScript(idx){
+  const l=window._filteredLeads?.[idx];
+  if(!l)return;
+
+  document.getElementById('scriptModal').classList.add('show');
+  document.getElementById('scriptContent').innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">🤖 Generating custom script...</div>';
+  document.getElementById('scriptFooter').innerHTML='';
+
+  const city=document.getElementById('bCity').value.trim()||'Leicester';
+
+  try{
+    const res=await fetch(API+'/generate-call-script',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({company:l,location:city})
+    });
+    const data=await res.json();
+    renderCallScript(l,data);
+  }catch(e){
+    document.getElementById('scriptContent').innerHTML='<div style="padding:40px;text-align:center;color:var(--red)">❌ Script generation failed. Check console for details.</div>';
+    console.error('Call script error:',e);
+  }
+}
+
+function renderCallScript(lead,data){
+  let html=`<div class="script-intro">
+    <div class="script-intro-title">📊 ${lead.name} — SEO Score: ${data.score||lead.seoScore}/100</div>
+    <div class="script-intro-text">${lead.website||''} ${lead.email?'· '+lead.email:''} ${lead.phone?'· '+lead.phone:''}</div>
+  </div>`;
+
+  const lines=data.script.split('\n');
+  let currentSection='';
+  let currentText='';
+
+  lines.forEach(line=>{
+    if(line.match(/^[A-Z\s]+\(/)||line.match(/^[A-Z\s]+$/)){
+      if(currentSection){
+        html+=`<div class="script-section"><div class="script-heading">${currentSection}</div><div class="script-text">${currentText.trim()}</div></div>`;
+      }
+      currentSection=line;
+      currentText='';
+    }else{
+      currentText+=line+'\n';
+    }
+  });
+  if(currentSection){
+    html+=`<div class="script-section"><div class="script-heading">${currentSection}</div><div class="script-text">${currentText.trim()}</div></div>`;
+  }
+
+  if(data.issues_breakdown&&data.issues_breakdown.length){
+    html+=`<div class="breakdown-section">
+      <div class="breakdown-title">📚 Issue Breakdown (for you to understand)</div>`;
+    data.issues_breakdown.forEach(issue=>{
+      const sevBadge=issue.severity==='very high'||issue.severity==='high'?'sev-high':'sev-medium';
+      html+=`<div class="breakdown-item">
+        <div class="breakdown-issue">${issue.issue}<span class="severity-badge ${sevBadge}">${issue.severity} impact</span></div>
+        <div class="breakdown-exp">${issue.explanation}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  document.getElementById('scriptContent').innerHTML=html;
+  document.getElementById('scriptFooter').innerHTML=`
+    <button class="btn bpri" onclick="logCall('${lead.name.replace(/'/g,"\\'")}','${(lead.email||'').replace(/'/g,"\\'")}','${(lead.website||'').replace(/'/g,"\\'")}',${data.score||0})">✅ Mark as Called</button>
+    <button class="btn bout" onclick="closeScript()">Close</button>`;
+}
+
+function logCall(name,email,website,score){
+  callHistory.push({name,email,website,score,date:new Date().toISOString()});
+  saveState();renderHistory();closeScript();updateStats();
+  toast('📞 Call logged to history!');
+}
+
+function closeScript(){document.getElementById('scriptModal').classList.remove('show')}
+
+function renderHistory(){
+  const el=document.getElementById('historyList');
+  if(!callHistory.length){el.innerHTML='<div class="empty">📭 No calls logged yet</div>';return}
+  el.innerHTML=callHistory.slice().reverse().map((h,i)=>`
+    <div class="lead-card">
+      <div style="flex:1">
+        <div class="lc-name">${h.name} <span style="font-weight:400;font-size:13px;color:var(--muted)">(Score: ${h.score||'?'}/100)</span></div>
+        <div class="lc-meta">${h.email||'No email'} ${h.website?'· '+h.website:''}<br>📅 ${new Date(h.date).toLocaleDateString()} at ${new Date(h.date).toLocaleTimeString()}</div>
+      </div>
+      <button class="btn bred bsm" onclick="callHistory.splice(${callHistory.length-1-i},1);saveState();renderHistory();updateStats()">Delete</button>
+    </div>
+  `).join('');
+}
+
+function sendBulk(idx){
+  const l=window._filteredLeads?.[idx];
+  if(!l||!l.email)return;
+  window.location.href=`mailto:${encodeURIComponent(l.email)}?subject=${encodeURIComponent(l.subject||'')}&body=${encodeURIComponent(l.body||'')}`;
+  sent++;
+  leads.push({id:Date.now(),domain:l.website||l.name,email:l.email,name:l.name,score:l.seoScore,type:'cold',status:'sent',date:new Date().toLocaleDateString('en-GB')});
+  saveState();updateStats();renderLeads();
+  toast('📤 Opened in Outlook!');
+}
+
+function flagBulk(idx){
+  const l=window._filteredLeads?.[idx];
+  if(!l)return;
+  queue.push({id:Date.now(),domain:l.website||l.name,email:l.email,name:l.name,subject:l.subject||'',body:l.body||'',reason:'Manually flagged',date:new Date().toLocaleDateString('en-GB')});
+  updateStats();renderQueue();
+  toast('🚩 Added to queue');
+}
+
+function saveBulk(idx){
+  const l=window._filteredLeads?.[idx];
+  if(!l)return;
+  leads.push({id:Date.now(),domain:l.website||l.name,email:l.email||'—',name:l.name,score:l.seoScore,type:'cold',status:'pending',date:new Date().toLocaleDateString('en-GB')});
+  saveState();updateStats();renderLeads();
+  toast('💾 Saved!');
+}
+
+function manualEmail(idx){
+  const email=prompt('Enter contact email:');
+  if(email&&window._filteredLeads?.[idx]){
+    window._filteredLeads[idx].email=email;
+    renderBulkLeads(window._filteredLeads);
+  }
+}
+
+function sendAllReady(){
+  const ready=(window._filteredLeads||[]).filter(l=>l.status==='ready'&&l.email);
+  if(!ready.length){toast('No ready leads!');return}
+  sendBulk(window._filteredLeads.findIndex(l=>l.status==='ready'&&l.email));
+  toast(`📤 Opened first of ${ready.length}`);
+}
+
+function approveQ(id){
+  const item=queue.find(q=>q.id===id);
+  if(!item)return;
+  window.location.href=`mailto:${encodeURIComponent(item.email)}?subject=${encodeURIComponent(item.subject)}&body=${encodeURIComponent(item.body)}`;
+  sent++;queue=queue.filter(q=>q.id!==id);
+  updateStats();renderQueue();toast('📤 Opened in Outlook!');
+}
+function removeQ(id){queue=queue.filter(q=>q.id!==id);updateStats();renderQueue()}
+function renderQueue(){
+  const el=document.getElementById('queueList');
+  if(!queue.length){el.innerHTML='<div class="empty">✅ Queue clear!</div>';return}
+  el.innerHTML=queue.map(q=>`<div class="qcard">
+    <div class="qh"><div><div class="qname">${q.domain||q.name} — ${q.email}</div><div class="qwhy">⚠️ ${q.reason}</div></div></div>
+    <div class="qbody">Subject: ${q.subject}\n\n${q.body}</div>
+    <div class="qfoot">
+      <button class="btn bpri bsm" onclick="approveQ(${q.id})">✅ Approve & Send</button>
+      <button class="btn bout bsm" onclick="removeQ(${q.id})">🗑 Remove</button>
+    </div>
+  </div>`).join('')
+}
+
+function cycleStatus(id){const l=leads.find(l=>l.id===id);if(!l)return;l.status=SC[(SC.indexOf(l.status)+1)%SC.length];saveState();updateStats();renderLeads()}
+function delLead(id){leads=leads.filter(l=>l.id!==id);saveState();updateStats();renderLeads()}
+function renderLeads(){
+  const w=document.getElementById('leadsBody');
+  if(!leads.length){w.innerHTML='<div class="empty">📭 No leads saved</div>';return}
+  w.innerHTML=`<table><thead><tr><th>Business</th><th>Email</th><th>Score</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>
+    ${leads.map(l=>`<tr>
+      <td><strong style="color:#fff">${l.domain}</strong>${l.name?`<br><span style="font-size:11px;color:var(--muted)">${l.name}</span>`:''}</td>
+      <td>${l.email}</td>
+      <td style="font-family:'JetBrains Mono',monospace;color:${l.score<30?'var(--red)':l.score<50?'var(--orange)':'var(--yellow)'}">${l.score}/100</td>
+      <td><span class="pill ${SCL[l.status]||'pp'}" onclick="cycleStatus(${l.id})">${SL[l.status]||'⬜ Pending'}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${l.date}</td>
+      <td><button class="dbtn" onclick="delLead(${l.id})">✕</button></td>
+    </tr>`).join('')}</tbody></table>`
+}
+
+function exportCSV(){
+  if(!leads.length){toast('No leads to export!');return}
+  const h=['Business','Email','Name','Score','Type','Status','Date'];
+  const rows=leads.map(l=>[l.domain,l.email,l.name||'',l.score,l.type,l.status,l.date]);
+  const csv=[h,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='outreach-leads.csv';a.click();
+  toast('📥 Downloaded!');
+}
+
+// Database functions
+async function loadDatabase(){
+  try{
+    const res=await fetch(API+'/database');
+    database=await res.json();
+    applyDBFilters();
+    document.getElementById('dbBadge').textContent=database.length;
+  }catch(e){console.error('DB load failed:',e)}
+}
+
+function applyDBFilters(){
+  const scoreLimit=parseInt(document.getElementById('dbFilterScore').value);
+  const statusFilter=document.getElementById('dbFilterStatus').value;
+  const emailFilter=document.getElementById('dbFilterEmail').value;
+  
+  filteredDB=database.filter(b=>{
+    if(scoreLimit>0&&b.seoScore>=scoreLimit)return false;
+    if(statusFilter!=='all'&&b.status!==statusFilter)return false;
+    if(emailFilter==='has'&&!b.email)return false;
+    if(emailFilter==='none'&&b.email)return false;
+    return true;
+  });
+  
+  document.getElementById('dbFilterCount').textContent=filteredDB.length;
+  renderDatabase();
+}
+
+function renderDatabase(){
+  const el=document.getElementById('databaseList');
+  if(!filteredDB.length){el.innerHTML='<div class="empty">📭 No businesses match filters</div>';return}
+  
+  el.innerHTML=filteredDB.map((b,i)=>{
+    const scoreClass=b.seoScore<30?'score-poor':b.seoScore<50?'score-avg':'score-ok';
+    const statusColors={pending:'var(--muted)',called:'var(--blue)',contacted:'var(--green)'};
+    const issuesHtml=(b.seoIssues||[]).slice(0,3).map(issue=>`<span class="issue-tag it-${issue.severity||'orange'}">${issue.title}</span>`).join('');
+    
+    return`<div class="lead-card">
+      <div class="lc-score ${scoreClass}">${b.seoScore||'?'}<div style="font-size:9px;color:var(--muted);font-weight:500">/100</div></div>
+      <div class="lc-info">
+        <div class="lc-name">${b.name} <span style="font-weight:400;font-size:12px;color:var(--muted)">· ${b.city||''}</span></div>
+        <div class="lc-meta">
+          ${b.domain?`🌐 ${b.domain}<br>`:' '}
+          ${b.email?`✉️ ${b.email}`:' No email'}
+          ${b.phone?` · 📞 ${b.phone}`:''}
+        </div>
+        ${issuesHtml?`<div class="lc-issues">${issuesHtml}</div>`:''}
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">Added: ${b.firstSeen||'—'}</div>
+      </div>
+      <div class="lc-actions">
+        <select class="btn bout bsm" onchange="updateDBStatus(${b.id},this.value)" style="cursor:pointer;padding:5px 8px">
+          <option value="pending" ${b.status==='pending'?'selected':''}>Pending</option>
+          <option value="called" ${b.status==='called'?'selected':''}>Called</option>
+          <option value="contacted" ${b.status==='contacted'?'selected':''}>Contacted</option>
+        </select>
+        ${b.email?`<button class="btn bpri bsm" onclick="openCallScriptDB(${i})">📞 Script</button>`:' '}
+      </div>
+    </div>`;
+  }).join('');
+  window._filteredDB=filteredDB;
+}
+
+async function updateDBStatus(bizId,newStatus){
+  try{
+    await fetch(API+`/database/${bizId}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({status:newStatus})
+    });
+    const biz=database.find(b=>b.id===bizId);
+    if(biz)biz.status=newStatus;
+    applyDBFilters();
+    toast('✅ Status updated');
+  }catch(e){toast('❌ Update failed')}
+}
+
+async function openCallScriptDB(idx){
+  const b=window._filteredDB?.[idx];
+  if(!b)return;
+  
+  document.getElementById('scriptModal').classList.add('show');
+  document.getElementById('scriptContent').innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">🤖 Generating unique script...</div>';
+  document.getElementById('scriptFooter').innerHTML='';
+  
+  try{
+    const res=await fetch(API+'/generate-call-script',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({company:b,location:b.city||'Leicester'})
+    });
+    const data=await res.json();
+    renderCallScript(b,data);
+  }catch(e){
+    document.getElementById('scriptContent').innerHTML='<div style="padding:40px;text-align:center;color:var(--red)">❌ Script generation failed</div>';
+    console.error(e);
+  }
+}
+
+function updateStats(){
+  const replied=leads.filter(l=>l.status==='replied').length;
+  document.getElementById('sSent').textContent=sent;
+  document.getElementById('sQueue').textContent=queue.length;
+  document.getElementById('sLeads').textContent=leads.length;
+  document.getElementById('sCalls').textContent=callHistory.length;
+  const qb=document.getElementById('qBadge');qb.textContent=queue.length;qb.style.display=queue.length?'inline':'none';
+  document.getElementById('lBadge').textContent=leads.length;
+  document.getElementById('hBadge').textContent=callHistory.length;
+  document.getElementById('dbBadge').textContent=database.length;
+}
+
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show')}
+function hideErr(id){document.getElementById(id).classList.remove('show')}
+let toastT;
+function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),3500)}
+
+loadState();loadDatabase();checkBackend();setInterval(checkBackend,10000);
+setInterval(loadDatabase,30000); // Refresh DB every 30s
+</script>
+</body>
+</html>
