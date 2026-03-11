@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>OutreachOS Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0e14;--card:#12151e;--border:#232840;--green:#00e87a;--orange:#ff8c42;--red:#ff4466;--blue:#4d9fff;--text:#e0e4f0;--muted:#5a6080}
+*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Familjen Grotesk',sans-serif;min-height:100vh}
+.shell{display:grid;grid-template-columns:200px 1fr;min-height:100vh}.sidebar{background:var(--card);border-right:1px solid var(--border);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px;font-size:17px;font-weight:800;color:#fff}
+.nav{padding:0 10px}.ni{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all 0.15s;margin-bottom:2px}
+.ni:hover{background:rgba(0,232,122,0.05);color:var(--text)}.ni.active{background:rgba(0,232,122,0.08);color:var(--green)}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.ptitle{font-size:16px;font-weight:700;color:#fff}.main{padding:24px 28px 80px;overflow-y:auto}.page{display:none}.page.active{display:block}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.ph{padding:13px 18px;background:rgba(35,40,64,0.5);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+.pb{padding:18px}label{display:block;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+input,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Familjen Grotesk',sans-serif;font-size:14px;padding:10px 14px;outline:none}
+input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,232,122,0.07)}.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;padding:10px 16px;transition:all 0.15s}
+.bpri{background:var(--green);color:#0c0e14}.bpri:hover{background:#00d46e;transform:translateY(-1px)}.bpri:disabled{opacity:0.35;cursor:not-allowed}
+.bfull{width:100%;margin-top:14px;padding:13px;font-size:14px}.bout{background:transparent;border:1px solid var(--border);color:var(--muted)}.bout:hover{border-color:var(--green);color:var(--green)}
+.log-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:monospace;font-size:11px;color:var(--muted);height:140px;overflow-y:auto;margin:14px 0;line-height:1.7}
+.prog-wrap{background:var(--bg);border:1px solid var(--border);border-radius:100px;height:8px;margin:10px 0;overflow:hidden}.prog-bar{height:100%;background:var(--green);transition:width 0.4s;width:0%}
+.lead-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;gap:12px;flex-wrap:wrap}
+.lead-card.ready{border-color:rgba(0,232,122,0.25);background:rgba(0,232,122,0.03)}.lc-name{font-size:14px;font-weight:700;color:#fff;margin-bottom:3px}
+.lc-meta{font-size:12px;color:var(--muted);line-height:1.6}.lc-score{font-family:monospace;font-size:22px;font-weight:500;text-align:center;min-width:60px}
+.score-poor{color:var(--red)}.score-avg{color:var(--orange)}.lc-actions{display:flex;flex-direction:column;gap:6px;min-width:130px}.bsm{padding:6px 12px;font-size:11px}
+.toast{position:fixed;bottom:24px;right:24px;background:#fff;color:#0c0e14;font-size:13px;font-weight:700;padding:12px 18px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:9999;display:none}
+.toast.show{display:flex;animation:toastIn 0.3s ease}@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}.modal-content{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;padding:24px}
+.modal-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:16px}.modal-close{position:absolute;top:16px;right:16px;background:transparent;border:none;color:var(--muted);font-size:24px;cursor:pointer}
+.script-section{margin-bottom:20px;padding:16px;background:rgba(35,40,64,0.3);border-radius:10px}.script-heading{font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px}
+.script-text{font-size:14px;line-height:1.8;color:var(--text);white-space:pre-wrap}.breakdown-item{padding:12px;background:rgba(35,40,64,0.2);border-radius:8px;margin-bottom:8px}
+.breakdown-title{font-size:12px;font-weight:700;color:#fff;margin-bottom:4px}.breakdown-exp{font-size:12px;color:var(--muted);line-height:1.6}
+.severity-badge{display:inline-block;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;margin-left:8px}
+.sev-high{background:rgba(255,68,102,0.2);color:var(--red)}.sev-medium{background:rgba(255,140,66,0.2);color:var(--orange)}
+.filter-bar{display:flex;gap:12px;align-items:center;padding:14px;background:rgba(35,40,64,0.3);border-radius:10px;margin-bottom:16px;flex-wrap:wrap}
+.filter-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}.filter-input{width:auto;min-width:120px}
+.status-banner{padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.st-offline{background:rgba(255,68,102,0.1);border:1px solid rgba(255,68,102,0.25);color:#ff8099}.st-online{background:rgba(0,232,122,0.1);border:1px solid rgba(0,232,122,0.25);color:var(--green)}
+</style>
+</head>
+<body>
+
+<div class="shell">
+<aside class="sidebar">
+  <div class="logo">OutreachOS Pro</div>
+  <nav class="nav">
+    <div class="ni active" onclick="go('search')"><span>🔍</span> Search</div>
+    <div class="ni" onclick="go('history')"><span>📋</span> Call History</div>
+  </nav>
+</aside>
+
+<div style="display:flex;flex-direction:column;grid-column:2">
+<header class="topbar"><div class="ptitle" id="pageTitle">Lead Search</div></header>
+<main class="main">
+
+<!-- SEARCH PAGE -->
+<div class="page active" id="page-search">
+  <div class="status-banner st-offline" id="statusBanner">⚠️ Backend not running — double-click RUN.bat</div>
+
+  <div class="panel">
+    <div class="ph">Search Settings</div>
+    <div class="pb">
+      <div class="f2">
+        <div class="field"><label>Trade</label><input id="trade" value="Plumbers"/></div>
+        <div class="field"><label>City</label><input id="city" placeholder="Derby, Leicester..."/></div>
+      </div>
+      <div class="f2">
+        <div class="field"><label>Results</label><select id="count"><option value="10">10</option><option value="15">15</option><option value="20">20</option></select></div>
+        <div class="field"><label>Type</label><select id="etype"><option value="cold">Cold</option><option value="audit">Audit</option></select></div>
+      </div>
+      <button class="btn bpri bfull" id="searchBtn" onclick="search()"><span id="searchTxt">🔍 Find Leads</span></button>
+    </div>
+  </div>
+
+  <div id="filterBar" class="filter-bar" style="display:none">
+    <span class="filter-label">Filter:</span>
+    <select id="filterScore" class="filter-input" onchange="applyFilter()">
+      <option value="0">All scores</option>
+      <option value="30">Below 30 (worst)</option>
+      <option value="40">Below 40</option>
+      <option value="50">Below 50</option>
+    </select>
+    <select id="filterEmail" class="filter-input" onchange="applyFilter()">
+      <option value="all">All</option>
+      <option value="has">Has email only</option>
+      <option value="none">No email</option>
+    </select>
+  </div>
+
+  <div id="jobPanel" style="display:none">
+    <div class="panel">
+      <div class="ph" id="jobTitle">Running Search</div>
+      <div class="pb" style="padding-bottom:10px">
+        <div class="prog-wrap"><div class="prog-bar" id="progBar"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px" id="progTxt">Starting...</div>
+        <div class="log-box" id="logBox"></div>
+      </div>
+    </div>
+    <div id="leadsList"></div>
+  </div>
+</div>
+
+<!-- HISTORY PAGE -->
+<div class="page" id="page-history">
+  <div style="margin-bottom:18px"><div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px">📋 Call History</div></div>
+  <div id="historyList"></div>
+</div>
+
+</main>
+</div>
+</div>
+
+<!-- CALL SCRIPT MODAL -->
+<div class="modal" id="scriptModal">
+  <div class="modal-content" style="position:relative">
+    <button class="modal-close" onclick="closeScript()">×</button>
+    <div class="modal-title">📞 Cold Call Script</div>
+    <div id="scriptContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API='http://localhost:5000/api';
+let allLeads=[], filteredLeads=[], callHistory=[], pollTimer;
+
+// Load state from localStorage
+function loadState(){const h=localStorage.getItem('callHistory');if(h)callHistory=JSON.parse(h);renderHistory();}
+function saveState(){localStorage.setItem('callHistory',JSON.stringify(callHistory));}
+
+async function checkBackend(){
+  try{await fetch(API+'/job/test',{signal:AbortSignal.timeout(2000)});setConnected(true);}
+  catch{try{await fetch(API+'/job/test');setConnected(true);}catch{setConnected(false);}}
+}
+
+function setConnected(ok){
+  const b=document.getElementById('statusBanner');
+  b.className='status-banner '+(ok?'st-online':'st-offline');
+  b.innerHTML=ok?'✅ Backend connected':'⚠️ Backend not running — double-click RUN.bat';
+  document.getElementById('searchBtn').disabled=!ok;
+}
+
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelector(`.ni[onclick*="${id}"]`).classList.add('active');
+  document.getElementById('pageTitle').textContent=id==='search'?'Lead Search':'Call History';
+}
+
+async function search(){
+  const trade=document.getElementById('trade').value.trim();
+  const city=document.getElementById('city').value.trim();
+  if(!city){toast('Enter a city');return;}
+
+  const btn=document.getElementById('searchBtn');
+  btn.disabled=true;document.getElementById('searchTxt').textContent='Searching...';
+  document.getElementById('jobPanel').style.display='block';
+  document.getElementById('filterBar').style.display='flex';
+  document.getElementById('leadsList').innerHTML='';
+  document.getElementById('logBox').innerHTML='';
+  document.getElementById('progBar').style.width='0%';
+
+  try{
+    const res=await fetch(API+'/search',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({trade,city,count:parseInt(document.getElementById('count').value),emailType:document.getElementById('etype').value})
+    });
+    const data=await res.json();
+    if(data.job_id)pollJob(data.job_id);
+    else{toast('Job start failed');btn.disabled=false;}
+  }catch{toast('Cannot reach backend');btn.disabled=false;document.getElementById('searchTxt').textContent='🔍 Find Leads';}
+}
+
+function pollJob(jobId){
+  clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{
+    try{
+      const res=await fetch(API+'/job/'+jobId);
+      const job=await res.json();
+      const logBox=document.getElementById('logBox');
+      logBox.innerHTML=job.log.map(l=>`<div>${l}</div>`).join('');
+      logBox.scrollTop=logBox.scrollHeight;
+      const pct=job.total>0?Math.round((job.progress/job.total)*100):0;
+      document.getElementById('progBar').style.width=pct+'%';
+      document.getElementById('progTxt').textContent=`${job.progress} / ${job.total} processed`;
+      document.getElementById('jobTitle').textContent=job.status==='complete'?'✅ Complete':'⚙ Running';
+
+      allLeads=job.leads||[];
+      applyFilter();
+
+      if(job.status==='complete'||job.status==='error'){
+        clearInterval(pollTimer);
+        const btn=document.getElementById('searchBtn');
+        btn.disabled=false;document.getElementById('searchTxt').textContent='🔍 Find Leads';
+        const ready=allLeads.filter(l=>l.status==='ready').length;
+        toast(job.status==='complete'?`✅ ${ready} leads ready`:'❌ Search failed');
+      }
+    }catch(e){console.error(e);}
+  },1500);
+}
+
+function applyFilter(){
+  const scoreLimit=parseInt(document.getElementById('filterScore').value);
+  const emailFilter=document.getElementById('filterEmail').value;
+  filteredLeads=allLeads.filter(l=>{
+    if(scoreLimit>0 && (l.seoScore||0)>=scoreLimit)return false;
+    if(emailFilter==='has' && !l.email)return false;
+    if(emailFilter==='none' && l.email)return false;
+    return true;
+  });
+  renderLeads(filteredLeads);
+}
+
+function renderLeads(leads){
+  const el=document.getElementById('leadsList');
+  el.innerHTML=leads.map((l,i)=>{
+    const scoreClass=l.seoScore<30?'score-poor':l.seoScore<50?'score-avg':'';
+    const cardClass=l.status==='ready'?'ready':'';
+    return`<div class="lead-card ${cardClass}">
+      <div class="lc-score ${scoreClass}">${l.seoScore||'?'}<div style="font-size:9px;color:var(--muted)">/100</div></div>
+      <div style="flex:1;min-width:180px">
+        <div class="lc-name">${l.name}</div>
+        <div class="lc-meta">
+          ${l.website?`🌐 ${l.website.replace('https://','')}<br>`:''}
+          ${l.email?`✉️ ${l.email}`:' No email'}
+          ${l.phone?` · 📞 ${l.phone}`:''}
+        </div>
+      </div>
+      <div class="lc-actions">
+        ${l.status==='ready'?`
+          <button class="btn bpri bsm" onclick="openCallScript(${i})">📞 Call Script</button>
+          <button class="btn bout bsm" onclick="sendEmail(${i})">📧 Email</button>
+        `:'<div style="font-size:11px;color:var(--muted)">Analysing...</div>'}
+      </div>
+    </div>`;
+  }).join('');
+  window._filteredLeads=leads;
+}
+
+async function openCallScript(idx){
+  const l=window._filteredLeads?.[idx];
+  if(!l)return;
+
+  document.getElementById('scriptModal').classList.add('show');
+  document.getElementById('scriptContent').innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">Generating script...</div>';
+
+  try{
+    const res=await fetch(API+'/generate-call-script',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({company:l,location:document.getElementById('city').value})
+    });
+    const data=await res.json();
+    renderCallScript(l,data);
+  }catch(e){
+    document.getElementById('scriptContent').innerHTML='<div style="padding:40px;text-align:center;color:var(--red)">Script generation failed</div>';
+  }
+}
+
+function renderCallScript(lead,data){
+  const sections=data.script.split('\n\n').filter(s=>s.trim());
+  let html=`<div style="margin-bottom:20px;padding:14px;background:rgba(0,232,122,0.1);border:1px solid rgba(0,232,122,0.2);border-radius:10px">
+    <div style="font-size:13px;font-weight:700;color:var(--green)">📊 SEO Score: ${data.score}/100</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px">${lead.name} — ${lead.website||''}</div>
+  </div>`;
+
+  sections.forEach(s=>{
+    html+=`<div class="script-section"><div class="script-heading">${s.split('\n')[0]}</div><div class="script-text">${s.split('\n').slice(1).join('\n')}</div></div>`;
+  });
+
+  if(data.issues_breakdown && data.issues_breakdown.length){
+    html+=`<div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border)">
+      <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:12px">📚 What These Issues Mean (for you to understand)</div>`;
+    data.issues_breakdown.forEach(issue=>{
+      const sevBadge=issue.severity==='very high'||issue.severity==='high'?'sev-high':'sev-medium';
+      html+=`<div class="breakdown-item">
+        <div class="breakdown-title">${issue.issue}<span class="severity-badge ${sevBadge}">${issue.severity} impact</span></div>
+        <div class="breakdown-exp">${issue.explanation}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  html+=`<div style="margin-top:20px;display:flex;gap:10px">
+    <button class="btn bpri" onclick="logCall('${lead.name}','${lead.email||''}','${lead.website||''}')">✅ Mark as Called</button>
+    <button class="btn bout" onclick="closeScript()">Close</button>
+  </div>`;
+
+  document.getElementById('scriptContent').innerHTML=html;
+}
+
+function logCall(name,email,website){
+  callHistory.push({name,email,website,date:new Date().toISOString(),notes:''});
+  saveState();renderHistory();closeScript();
+  toast('📞 Call logged!');
+}
+
+function sendEmail(idx){
+  const l=window._filteredLeads?.[idx];
+  if(!l||!l.email)return;
+  window.location.href=`mailto:${encodeURIComponent(l.email)}?subject=${encodeURIComponent(l.subject||'')}&body=${encodeURIComponent(l.body||'')}`;
+  toast('📧 Opened Outlook');
+}
+
+function closeScript(){document.getElementById('scriptModal').classList.remove('show');}
+
+function renderHistory(){
+  const el=document.getElementById('historyList');
+  if(!callHistory.length){el.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted)">No calls logged yet</div>';return;}
+  el.innerHTML=callHistory.slice().reverse().map((h,i)=>`
+    <div class="lead-card">
+      <div style="flex:1">
+        <div class="lc-name">${h.name}</div>
+        <div class="lc-meta">${h.email||'No email'}<br>${new Date(h.date).toLocaleDateString()} at ${new Date(h.date).toLocaleTimeString()}</div>
+      </div>
+      <button class="btn bout bsm" onclick="callHistory.splice(${callHistory.length-1-i},1);saveState();renderHistory()">Delete</button>
+    </div>
+  `).join('');
+}
+
+let toastT;
+function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),3000);}
+
+loadState();checkBackend();setInterval(checkBackend,10000);
+</script>
+</body>
+</html>

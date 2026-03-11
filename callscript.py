@@ -1,9 +1,6 @@
 """
-callscript.py — AI-generated cold call scripts
-
-PURPOSE: Generate unique, personalized call scripts for each business
-WHEN TO EDIT: Change script style, tone, structure, or business impact language
-DEPENDENCIES: OpenRouter API (free tier), urllib for HTTP requests
+callscript.py — AI-generated unique call scripts
+Translates SEO issues into real business consequences
 """
 
 import os
@@ -12,8 +9,6 @@ import re
 import urllib.request
 
 
-# Issue library: maps technical SEO terms to business-friendly explanations
-# EDIT THIS to change how issues are explained to prospects
 ISSUE_LIBRARY = {
     "No page title": {
         "pitch": "your site has no page title — Google literally can't tell what you do",
@@ -70,33 +65,23 @@ ISSUE_LIBRARY = {
 
 async def generate_call_script_ai(company: dict, location: str) -> dict:
     """
-    Generate UNIQUE AI-powered call script for this specific business
-    
-    Args:
-        company: Dict with keys: name, seoScore, seoIssues, wordCount, email, phone, website
-        location: City name (e.g. "Derby")
-    
-    Returns:
-        Dict with keys: script (full text), issues_breakdown (array), score, confidence
-    
-    EDIT THIS FUNCTION to change: how scripts are generated, what gets included
+    Generate UNIQUE AI call script - no templates
     """
     
-    # Extract business details
     name = company.get('firstName', '') or (company.get('name', '').split()[0] if company.get('name') else '')
     business_name = company.get('name', 'the business')
     score = company.get('seoScore', company.get('score', 25))
     issues = company.get('seoIssues', [])
     word_count = company.get('wordCount', 0)
     
-    # Pick top 3 most impactful issues (sorted by severity: red > orange > yellow)
+    # Pick top 3 issues
     priority_issues = sorted(
         issues[:5],
         key=lambda i: {'red': 3, 'orange': 2, 'yellow': 1}.get(i.get('severity', 'yellow'), 0),
         reverse=True
     )[:3]
     
-    # Build business-friendly explanations for each issue
+    # Build business impact explanations
     issues_breakdown = []
     issues_for_prompt = []
     
@@ -108,7 +93,6 @@ async def generate_call_script_ai(company: dict, location: str) -> dict:
             "severity": "medium"
         })
         
-        # Replace placeholders with real data
         pitch = template['pitch'].replace('[WORDS]', str(word_count)).replace('[CITY]', location)
         impact = template['impact'].replace('[CITY]', location)
         
@@ -119,65 +103,47 @@ async def generate_call_script_ai(company: dict, location: str) -> dict:
             'severity': template['severity']
         })
     
-    # Get OpenRouter API key from environment
+    # Call AI to generate unique script
     api_key = os.environ.get('OPENROUTER_API_KEY', '').strip()
     if not api_key:
-        print("[CallScript] No API key — using fallback template")
         return _fallback_script(name, business_name, location, score, issues_breakdown)
     
-    # Build prompt for AI
     issues_text = '\n\n'.join(issues_for_prompt)
     
-    # EDIT THIS PROMPT to change script style, tone, structure
-    prompt = f"""You are a UK sales expert. Write a COMPLETE cold call script for calling {business_name}, a plumbing business in {location}.
+    prompt = f"""You are a UK sales expert writing a unique cold call script for calling {business_name}, a plumbing business in {location}.
 
-Their website scores {score}/100 for SEO. Here are the specific problems:
+Their website scores {score}/100 for SEO. Here are the specific problems and business impacts:
 
 {issues_text}
 
-Write a FULL SCRIPT with word-for-word dialogue for each section:
+Write a natural, conversational script with these sections:
 
-1. OPENING (Your first 10 seconds):
-Write the EXACT words to say: "Hi {name if name else 'there'}, this is [Your Name] from [Your Company]. I'll be upfront — this is a cold call about your website, but I promise I'll keep it really quick. Is now a good time?"
+OPENING (10 seconds):
+Start with: "Hi {name if name else 'there'}, this is [Your Name] — I'll be upfront, this is a cold call about your website, but I'll keep it really quick. Is now okay?"
 
-2. THE HOOK (15 seconds):
-Write EXACT dialogue explaining: I searched for plumbers in {location} on Google and {business_name} wasn't showing up. I had a look at your site and it's scoring {score}/100, which explains the issue.
+THE HOOK (15 seconds):
+Mention you searched for plumbers in {location} on Google and {business_name} wasn't appearing. Their SEO score is {score}/100 which explains why.
 
-3. THE PROBLEM BREAKDOWN (40 seconds):
-Pick the 2 WORST issues from above. For each one:
-- Explain it in PLAIN ENGLISH (no jargon)
-- State the EXACT business impact (lost calls, customers going elsewhere)
-- Use NUMBERS where you can (e.g., "You're losing 5-10 calls a day")
+THE PROBLEMS (30 seconds):
+Pick the 2 most impactful issues from above. Explain them in PLAIN ENGLISH using the business impacts provided. Focus on what it's costing them in real terms — lost calls, lost customers, lost revenue. Be specific with numbers where possible. Make it feel urgent but not aggressive.
 
-Write as SPOKEN DIALOGUE — short sentences, easy to say out loud.
+THE OFFER (10 seconds):
+Offer to send them a free breakdown of what you found. 5 minute read, shows exactly what's wrong, zero strings attached.
 
-4. THE TRANSITION (10 seconds):
-Acknowledge they probably don't have time to chat now. Say something like: "Look, I know you're busy running a business, not worrying about websites..."
-
-5. THE OFFER (15 seconds):
-Offer to send a free breakdown. Make it clear:
-- Completely free
-- Takes 5 minutes to read
-- Shows exactly what's wrong
-- No strings attached
-- No sales call
-
-6. THE CLOSE (10 seconds):
-Ask for their email address to send it to. Make it feel easy and low-pressure.
+THE CLOSE:
+Ask for their email to send it to.
 
 CRITICAL RULES:
-- Write EVERY WORD they should say — this is a script they'll read word-for-word
-- Short sentences — easy to say out loud
+- Write NATURALLY like a real conversation — not robotic
+- Use SHORT sentences — easy to say out loud
 - NO jargon or technical terms
-- Conversational tone — like talking to a mate, not a sales pitch
-- Focus on CONSEQUENCES (lost money, lost customers)
-- Make each script UNIQUE based on their specific issues
-- Include natural pauses and transitions
-- Don't be pushy or aggressive
+- Focus on CONSEQUENCES — lost calls, customers going elsewhere, wasted money
+- Make each script unique based on THEIR specific issues
+- Be friendly but direct
+- Don't be salesy or pushy
 
-Format with clear section headers."""
+Format as clean text with clear section headers."""
 
-    # Call AI to generate the script
     import asyncio
     loop = asyncio.get_event_loop()
     
@@ -190,21 +156,15 @@ Format with clear section headers."""
             'confidence': 'high'
         }
     except Exception as e:
-        print(f"[CallScript] AI generation failed: {e} — using fallback")
+        print(f"[CallScript] AI failed: {e}")
         return _fallback_script(name, business_name, location, score, issues_breakdown)
 
 
 def _call_ai(api_key, prompt):
-    """
-    Makes HTTP request to OpenRouter API
-    Tries multiple free models in order until one works
-    
-    EDIT THIS to: change which models are used, timeout, temperature
-    """
     models = [
         "meta-llama/llama-4-scout:free",
         "google/gemini-2.0-flash-exp:free",
-        "openrouter/free"  # Catch-all that picks any free model
+        "openrouter/free"
     ]
     
     for model in models:
@@ -212,8 +172,8 @@ def _call_ai(api_key, prompt):
             payload = json.dumps({
                 "model": model,
                 "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 1200,  # Increased for longer scripts
-                "temperature": 0.85,  # High = more creative/varied
+                "max_tokens": 900,
+                "temperature": 0.9,
             }).encode('utf-8')
             
             req = urllib.request.Request(
@@ -227,7 +187,7 @@ def _call_ai(api_key, prompt):
                 }
             )
             
-            with urllib.request.urlopen(req, timeout=35) as resp:
+            with urllib.request.urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode('utf-8'))
             
             return data['choices'][0]['message']['content'].strip()
@@ -235,44 +195,31 @@ def _call_ai(api_key, prompt):
             print(f"[CallScript] Model {model} failed: {e}")
             continue
     
-    raise RuntimeError("All AI models failed to generate script")
+    raise RuntimeError("All models failed")
 
 
 def _fallback_script(name, business_name, location, score, issues_breakdown):
-    """
-    Fallback template if AI completely fails
-    Still personalizes based on their issues
-    
-    EDIT THIS if you want to change the backup script structure
-    """
+    """Last resort if AI completely fails"""
     greeting = f"Hi {name}," if name else "Hi there,"
     
-    # Build problem section from their actual issues
     issues_text = ""
     for i, issue in enumerate(issues_breakdown[:2], 1):
-        issues_text += f"\n\n{i}. {issue['issue']}\n{issue['explanation']}"
+        issues_text += f"\n{i}. {issue['issue']}: {issue['explanation']}"
     
     script = f"""OPENING (10 seconds)
-{greeting} this is [Your Name] from [Your Company]. I'll be upfront — this is a cold call about your website's Google visibility, but I promise I'll keep it really quick. Is now a good time?
-
-[If yes, continue. If no: "No worries — can I call you back tomorrow morning?"]
+{greeting} this is [Your Name] — I'll be upfront, this is a cold call about your website's visibility on Google, but I'll keep it really quick. Is now okay?
 
 THE HOOK (15 seconds)
-So I was searching for plumbers in {location} on Google earlier, and {business_name} wasn't showing up at all. I had a quick look at your site and ran it through our SEO tool — it's scoring {score} out of 100, which explains why you're not appearing in searches.
+I was searching for plumbers in {location} on Google and {business_name} wasn't showing up. I had a look at your site and it's scoring {score}/100 for SEO — which explains why you're invisible.
 
-THE PROBLEM BREAKDOWN (40 seconds)
-There are a couple of specific things that are costing you calls every single day:{issues_text}
+THE PROBLEMS (30 seconds)
+A couple of specific things that are costing you calls:{issues_text}
 
-THE TRANSITION (10 seconds)
-Look, I know you're busy running a business, not worrying about websites. That's exactly why I'm calling.
+THE OFFER (10 seconds)
+I can send you a free breakdown showing exactly what's wrong and how to fix it. 5 minute read, zero strings attached.
 
-THE OFFER (15 seconds)
-What I'd like to do is send you a free breakdown of what I found. It's a 5-minute read, shows you exactly what's wrong and how to fix it. Completely free, no strings attached, I'm not going to call you trying to sell you anything.
-
-THE CLOSE (10 seconds)
-If that sounds useful, what's the best email address to send it to?
-
-[Get email, thank them, end call]"""
+THE CLOSE
+What's the best email to send that to?"""
 
     return {
         'script': script,

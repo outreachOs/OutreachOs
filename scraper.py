@@ -125,18 +125,14 @@ async def find_businesses(trade: str, city: str, count: int = 10) -> list:
 
                     # Rating & reviews
                     try:
-                        # Get rating (e.g., "4.5")
-                        rating_el = await page.locator('.F7nice span[aria-hidden="true"]').first.text_content(timeout=2000)
-                        biz['rating'] = rating_el.strip() if rating_el else ''
+                        rating_text = await page.locator('.F7nice').first.text_content(timeout=2000)
+                        biz['rating'] = rating_text.strip()
                     except:
                         biz['rating'] = ''
 
                     try:
-                        # Get review count from aria-label (e.g., "63 reviews")
-                        review_el = await page.locator('span[aria-label*="review"]').first
-                        aria_label = await review_el.get_attribute('aria-label', timeout=2000)
-                        # Extract number from "63 reviews" or "1 review"
-                        match = re.search(r'(\d+)\s*review', aria_label or '', re.IGNORECASE)
+                        review_text = await page.locator('span[aria-label*="review"]').first.get_attribute('aria-label', timeout=2000)
+                        match = re.search(r'(\d+)', review_text or '')
                         biz['reviews'] = int(match.group(1)) if match else 0
                     except:
                         biz['reviews'] = 0

@@ -152,53 +152,29 @@ def update_business(biz_id):
 
 
 def save_to_db(business):
-    """
-    Save or update business in database
-    Prevents duplicates by checking domain first
-    
-    EDIT THIS to: change what fields get saved, add new columns
-    """
+    """Save or update business in database"""
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
     now = time.strftime('%Y-%m-%d %H:%M:%S')
-    domain = business.get('website', '').replace('https://','').replace('http://','').replace('www.','').split('/')[0]
+    domain = business.get('website', '').replace('https://','').replace('http://','').split('/')[0]
     
-    # Skip if no domain (can't identify duplicates without it)
-    if not domain:
-        conn.close()
-        return
-    
-    # Check if this business already exists
-    c.execute('SELECT id, seo_score FROM businesses WHERE domain = ?', (domain,))
+    # Check if exists
+    c.execute('SELECT id FROM businesses WHERE domain = ?', (domain,))
     existing = c.fetchone()
     
     if existing:
-        # Business exists — only update if we have new/better data
-        existing_id, existing_score = existing
-        new_score = business.get('seoScore', 0)
-        
-        # Only update if new score is different or we have new email
-        if new_score != existing_score or business.get('email'):
-            c.execute('''UPDATE businesses SET 
-                email = COALESCE(NULLIF(?, ''), email),
-                phone = COALESCE(NULLIF(?, ''), phone),
-                seo_score = ?,
-                seo_issues = ?,
-                word_count = ?,
-                has_schema = ?,
-                mobile_viewport = ?,
-                last_updated = ?
-                WHERE domain = ?''',
-                (business.get('email',''), business.get('phone',''), new_score,
-                 json.dumps(business.get('seoIssues',[])), business.get('wordCount',0),
-                 business.get('hasSchema',False), business.get('mobileViewport',False),
-                 now, domain))
-            print(f"[DB] Updated existing: {domain}")
-        else:
-            print(f"[DB] Skipped duplicate: {domain}")
+        # Update
+        c.execute('''UPDATE businesses SET 
+            email = ?, phone = ?, seo_score = ?, seo_issues = ?, 
+            word_count = ?, has_schema = ?, mobile_viewport = ?, last_updated = ?
+            WHERE domain = ?''',
+            (business.get('email',''), business.get('phone',''), business.get('seoScore',0),
+             json.dumps(business.get('seoIssues',[])), business.get('wordCount',0),
+             business.get('hasSchema',False), business.get('mobileViewport',False),
+             now, domain))
     else:
-        # New business — insert it
+        # Insert
         c.execute('''INSERT INTO businesses 
             (name, domain, email, phone, address, city, rating, reviews, seo_score, 
              seo_issues, word_count, has_schema, mobile_viewport, first_seen, last_updated)
@@ -208,7 +184,6 @@ def save_to_db(business):
              business.get('reviews',0), business.get('seoScore',0),
              json.dumps(business.get('seoIssues',[])), business.get('wordCount',0),
              business.get('hasSchema',False), business.get('mobileViewport',False), now, now))
-        print(f"[DB] Added new: {domain}")
     
     conn.commit()
     conn.close()
